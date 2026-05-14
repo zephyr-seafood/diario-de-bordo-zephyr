@@ -591,6 +591,7 @@ const SETORES = ["Salão","Cozinha","Bar","Sushi","Caixa","Serviços Gerais","Li
 // ═══ STATE ═══
 let ST = {turno:null,clima:null,faltasList:[],taxasRows:[],editId:null};
 let histPage=1; const HPP=10;
+let htPage=1; const HT_PP=8;
 let rankMode='val';
 const isView = false;
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2x2bfQdKA_azBhE_lW8OHZcEB0wwnUpdUeQ383os2nGXEY1tJZtOUeARv1yCL3dWL8A/exec';
@@ -1547,7 +1548,7 @@ function fazerLogout(){
   localStorage.removeItem('z_zephyr_perfil');
   document.getElementById('login_senha').value='';
   document.getElementById('login_erro').style.display='none';
-  document.getElementById('login_screen').style.display='flex';
+  const ls=document.getElementById('login_screen');if(ls)ls.style.display='flex';
   document.body.classList.remove('view-mode');
 }
 
@@ -1630,7 +1631,7 @@ async function migrarTaxasParaSheets(){
   if(!todas.length){ showToast('⚠️ Nenhum dado para migrar','error'); return; }
 
   const btn = document.getElementById('btn_migrar');
-  if(btn){ btn.textContent='⏳ Migrando...'; btn.disabled=true; }
+  if(btn){ btn.textContent='⏳ Migrando...'; btn.disabled=true; } 
   showToast('⏳ Enviando '+todas.length+' registros...','success');
 
   let ok=0, erro=0;
@@ -1638,13 +1639,14 @@ async function migrarTaxasParaSheets(){
     const rec = todas[i];
     const r = await api('salvarTaxas', rec);
     if(r.ok) ok++; else erro++;
-    if(i%10===0 && btn) btn.textContent='⏳ '+i+'/'+todas.length+'...';
+    if(i%10===0){const bp=document.getElementById('btn_migrar');if(bp)bp.textContent='⏳ '+i+'/'+todas.length+'...';}
   }
 
   // Marca como migrado para nunca mais duplicar
   SD('migracao_taxas_ok', true);
 
-  if(btn){ btn.textContent='✓ Migração concluída'; btn.disabled=true; btn.style.background='var(--gray)'; }
+  const btnFinal=document.getElementById('btn_migrar');
+  if(btnFinal){ btnFinal.textContent='✓ Migração concluída'; btnFinal.disabled=true; btnFinal.style.background='var(--gray)'; }
   showToast('✓ '+ok+' registros enviados!'+(erro?' ('+erro+' erros)':''),'success');
 }
 
@@ -1683,7 +1685,7 @@ function checkTurnoHoje(){
   if(!alerta)return;
   if(hoje_regs.length>0){
     const nomes = hoje_regs.map(f=>f.turno+' ('+f.gerente+')').join(', ');
-    document.getElementById('turno_alerta_txt').textContent = 'Já registrado: '+nomes;
+    const alertaTxt=document.getElementById('turno_alerta_txt');if(alertaTxt)alertaTxt.textContent='Já registrado: '+nomes;
     alerta.style.display='flex';
     alerta._regs = hoje_regs;
   } else {
@@ -1709,7 +1711,6 @@ function ignorarAlerta(){
 }
 
 // ═══ HISTÓRICO TAXAS ═══
-let htPage=1; const HT_PP=8;
 function renderHistTaxas(){
   const allTaxas=LD('taxas')||TAXAS_HISTORICO;
   const de=document.getElementById('ht_de').value;
@@ -1899,7 +1900,7 @@ function exportarPDF(){
 
   // Hide login screen to avoid it showing in PDF
   const loginScreen = document.getElementById('login_screen');
-  if(loginScreen) loginScreen.style.display='none';
+  try { if(loginScreen) loginScreen.style.display='none'; } catch(e){}
   const w=window.open('','_blank');
   w.document.write(html);
   w.document.close();
@@ -1991,12 +1992,12 @@ async function sincronizarSheets(){
 }
 
 // Auto-sync on load
-window.addEventListener('load', ()=>setTimeout(sincronizarSheets, 1500));
+window.addEventListener('load', ()=>setTimeout(()=>{try{sincronizarSheets();}catch(e){console.error('Sync error:',e);}}, 1500));
 
 // Init
 document.getElementById('f_data').valueAsDate=new Date();
 document.getElementById('taxa_data').valueAsDate=new Date();
-renderTaxaRows();renderFaltas();setTimeout(checkTurnoHoje,300);
+renderTaxaRows();renderFaltas();setTimeout(()=>{try{checkTurnoHoje();}catch(e){}},300);
 </script>
 
 <!-- ═══ TELA DE LOGIN ═══ -->
