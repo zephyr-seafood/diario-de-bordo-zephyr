@@ -996,7 +996,7 @@ function setRankMode(m){
 
 function renderDashTaxas(){
   const rows=getTaxasFiltered();
-  const total=rows.reduce((a,r)=>a+(r.valor||0),0);
+  const total=rows.reduce((a,r)=>a+(Math.min(parseFloat(r.valor)||0,9999)),0);
   const qtd=rows.length;
   const avg=qtd>0?total/qtd:0;
   const uniqColab=new Set(rows.map(r=>r.colaborador)).size;
@@ -1809,7 +1809,7 @@ function exportarPDF(){
   const rows=getTaxasFiltered();
   if(!rows.length)return showToast('⚠️ Nenhum dado para exportar','error');
 
-  const total=rows.reduce((a,r)=>a+(r.valor||0),0);
+  const total=rows.reduce((a,r)=>a+(Math.min(parseFloat(r.valor)||0,9999)),0);
   const dtFmt=d=>fmtData(d,{weekday:'short',day:'2-digit',month:'short'});
   const titulo=data?'Taxas — '+new Date(data+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}):(mes?'Taxas — '+mes.charAt(0)+mes.slice(1).toLowerCase():'Taxas — Período Completo');
 
@@ -1922,10 +1922,21 @@ async function sincronizarSheets(){
       SD('feedbacks', [...feedbacks, ...localOnly]);
     }
     if(taxas && taxas.length){
+      // Sanitize valores vindos do Sheets — máximo R$5.000 por taxa
+      const taxasSanitizadas = taxas.map(rec=>({
+        ...rec,
+        total: Math.min(parseFloat(rec.total)||0, 99999),
+        taxas: (rec.taxas||[]).map(tx=>({
+          ...tx,
+          valor: Math.min(parseFloat(String(tx.valor).replace(',','.'))||0, 9999),
+          vh: Math.min(parseFloat(String(tx.vh).replace(',','.'))||0, 999),
+          horas: Math.min(parseFloat(String(tx.horas).replace(',','.'))||0, 24),
+        }))
+      }));
       const localTxs = LD('taxas')||[];
-      const sheetsIds = new Set(taxas.map(t=>String(t.id)));
+      const sheetsIds = new Set(taxasSanitizadas.map(t=>String(t.id)));
       const localOnly = localTxs.filter(t=>!sheetsIds.has(String(t.id)));
-      SD('taxas', [...taxas, ...localOnly]);
+      SD('taxas', [...taxasSanitizadas, ...localOnly]);
     }
     // If Sheets taxas is empty, keep local data intact
     else {
