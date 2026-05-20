@@ -505,6 +505,17 @@ body.view-mode .form-footer{display:none;}
       <div class="card-title">⏱ Tempo Médio de Saída por Categoria</div>
       <div id="df_tempo_chart"></div>
     </div>
+    <div class="card col-full">
+      <div class="card-title">👨‍🍳 Produtividade por Responsável de Setor</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <select id="df_resp_setor" onchange="renderProdutividade()" style="max-width:180px;">
+          <option value="cozinha">🍳 Cozinha</option>
+          <option value="sushi">🍣 Sushi</option>
+          <option value="bar">🍹 Bar</option>
+        </select>
+      </div>
+      <div id="df_produtividade"></div>
+    </div>
     <!-- Ranking faltas -->
     <div class="card">
       <div class="card-title">🚫 Itens em Falta (mais frequentes)</div>
@@ -787,7 +798,7 @@ function switchTab(t){
   if(t==='hist-taxas'){renderHistTaxas();setTimeout(checkBtnMigrar,100);}
   if(t==='eventos')renderEventos();
   if(t==='dash-taxas')renderDashTaxas();
-  if(t==='dash-feedback')renderDashFeedback();
+  if(t==='dash-feedback'){renderDashFeedback();renderProdutividade();}
 }
 function selectPill(type,val,el){
   if(isView)return;ST[type]=val;
@@ -2230,6 +2241,94 @@ function verDetalheColab(nome){
       </div>
     </div>`;
   document.getElementById('modal_overlay').classList.add('open');
+}
+
+// ═══ PRODUTIVIDADE POR RESPONSÁVEL ═══
+const RESP_SETOR_MAP = {
+  cozinha: {label:'🍳 Cozinha', tempo:'principal', cor:'#e65100', bg:'#fff3e0'},
+  sushi:   {label:'🍣 Sushi',   tempo:'sushi',     cor:'#1565c0', bg:'#e3f2fd'},
+  bar:     {label:'🍹 Bar',     tempo:'bar',        cor:'#6a1b9a', bg:'#f3e5f5'},
+};
+
+function renderProdutividade(){
+  const fbs = LD('feedbacks')||[];
+  const periodo = document.getElementById('df_periodo')?.value||'all';
+  const turnoFilt = document.getElementById('df_turno')?.value||'';
+  const gerenteFilt = document.getElementById('df_gerente')?.value||'';
+  const setor = document.getElementById('df_resp_setor')?.value||'cozinha';
+  const cfg = RESP_SETOR_MAP[setor];
+  const el = document.getElementById('df_produtividade');
+  if(!el) return;
+
+  const now = new Date();
+  const cutoff = periodo==='all'?new Date('2000-01-01'):new Date(now-parseInt(periodo)*864e5);
+
+  // Filter feedbacks
+  const data = fbs.filter(f=>{
+    const d = parseData(f.data);
+    if(!d||d<cutoff) return false;
+    if(turnoFilt&&f.turno!==turnoFilt) return false;
+    if(gerenteFilt&&f.gerente!==gerenteFilt) return false;
+    if(!f.responsaveis) return false;
+    if(!f.responsaveis[setor]) return false;
+    if(!f.tempos||!f.tempos[cfg.tempo]) return false;
+    return true;
+  });
+
+  if(!data.length){
+    el.innerHTML='<div class="empty-state" style="padding:24px;"><div class="icon">👨‍🍳</div><p>Sem dados ainda.<br>Preencha o campo <strong>Responsável por Setor</strong> no Feedback para ver este indicador.</p></div>';
+    return;
+  }
+
+  // Group by responsavel
+  const byResp = {};
+  data.forEach(f=>{
+    const resp = f.responsaveis[setor].trim();
+    const tempo = parseInt(f.tempos[cfg.tempo]);
+    if(!resp||!tempo) return;
+    if(!byResp[resp]) byResp[resp]={qtd:0,totalTempo:0,turnos:[]};
+    byResp[resp].qtd++;
+    byResp[resp].totalTempo+=tempo;
+    byResp[resp].turnos.push({data:f.data,turno:f.turno,tempo});
+  });
+
+  const respList = Object.entries(byResp)
+    .map(([nome,v])=>({nome, qtd:v.qtd, media:v.totalTempo/v.qtd, turnos:v.turnos}))
+    .sort((a,b)=>a.media-b.media); // menor tempo = melhor = primeiro
+
+  if(!respList.length){
+    el.innerHTML='<div class="empty-state" style="padding:24px;"><p>Sem dados suficientes</p></div>';
+    return;
+  }
+
+  const minMedia = respList[0].media;
+  const maxMedia = respList[respList.length-1].media;
+  const mediaGeral = data.reduce((a,f)=>a+parseInt(f.tempos[cfg.tempo]||0),0)/data.length;
+
+  el.innerHTML = '<div style="margin-bottom:12px;font-size:12px;color:var(--gray);">Média geral do período: <strong>'+mediaGeral.toFixed(1)+' min</strong> · '+data.length+' turno'+(data.length!==1?'s':'')+' com dados</div>'+
+  '<div class="bar-chart">'+
+  respList.map((r,i)=>{
+    const pct = maxMedia>0?(r.media/maxMedia*100).toFixed(0):100;
+    // Color: best (lowest) = green, worst (highest) = coral, others = setor color
+    const barColor = i===0?'var(--green)':i===respList.length-1&&respList.length>1?'var(--coral)':cfg.cor;
+    const badge = i===0&&respList.length>1?'<span style="font-size:10px;background:#e8f5e9;color:var(--green);padding:2px 8px;border-radius:10px;font-weight:700;margin-left:6px;">🏆 Melhor</span>':
+                  i===respList.length-1&&respList.length>1?'<span style="font-size:10px;background:#fff5f5;color:var(--coral);padding:2px 8px;border-radius:10px;font-weight:700;margin-left:6px;">⚠️ Atenção</span>':'';
+    const diff = r.media - mediaGeral;
+    const diffStr = diff===0?'':diff<0?'<span style="color:var(--green);font-size:11px;"> ('+diff.toFixed(1)+'min)</span>':'<span style="color:var(--coral);font-size:11px;"> (+'+diff.toFixed(1)+'min)</span>';
+    return '<div style="margin-bottom:14px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">'+
+        '<div style="font-size:13px;font-weight:600;">'+r.nome+badge+'</div>'+
+        '<div style="font-size:12px;color:var(--gray);">'+r.qtd+' turno'+(r.qtd!==1?'s':'')+'</div>'+
+      '</div>'+
+      '<div class="bar-track" style="height:28px;">'+
+        '<div class="bar-fill" style="width:'+pct+'%;background:'+barColor+';">'+
+          '<span class="bar-val">'+r.media.toFixed(1)+' min'+' </span>'+
+        '</div>'+
+        '<span style="font-size:11px;color:var(--gray);padding-left:8px;">'+diffStr+'</span>'+
+      '</div>'+
+    '</div>';
+  }).join('')+
+  '</div>';
 }
 
 </script>
