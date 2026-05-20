@@ -1098,6 +1098,12 @@ function deleteFeedback(id){
 // ═══════════════════════════════════════
 // DASHBOARD TAXAS
 // ═══════════════════════════════════════
+const MESES_MAP = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+function getMesFromData(data){
+  if(!data)return '';
+  const d=parseData(data);
+  return d?MESES_MAP[d.getMonth()]:'';
+}
 function getTaxasFiltered(){
   const mes=document.getElementById('dt_mes').value;
   const setor=document.getElementById('dt_setor').value;
@@ -1106,12 +1112,14 @@ function getTaxasFiltered(){
   const allTaxas=LD('taxas')||TAXAS_HISTORICO;
   let rows=[];
   allTaxas.forEach(rec=>{
-    if(mes&&rec.mes!==mes)return;
-    if(data&&rec.data!==data)return;
+    // Derive mes from data if missing
+    const recMes=rec.mes||getMesFromData(rec.data);
+    if(mes&&recMes!==mes)return;
+    if(data&&String(rec.data).substring(0,10)!==data)return;
     (rec.taxas||[]).forEach(tx=>{
       if(setor&&tx.setor!==setor)return;
       if(tipo&&tx.tipo!==tipo)return;
-      rows.push({...tx,data:rec.data,mes:rec.mes});
+      rows.push({...tx,data:rec.data,mes:recMes});
     });
   });
   return rows;
@@ -1242,6 +1250,10 @@ function renderDashTaxas(){
   let colabList=Object.entries(byColab).filter(([n])=>!busca||n.toLowerCase().includes(busca)).sort((a,b)=>rankMode==='val'?b[1].total-a[1].total:b[1].qtd-a[1].qtd).slice(0,20);
   const maxColab=colabList.length>0?(rankMode==='val'?colabList[0][1].total:colabList[0][1].qtd):1;
   const rankClass=(i)=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
+  // If searching a specific colaborador, show monthly breakdown
+  const buscaColab=(document.getElementById('rank_busca').value||'').toLowerCase();
+  const showMonthly = buscaColab.length >= 3;
+  
   document.getElementById('dt_ranking').innerHTML=colabList.length?`<div class="ranking-list">${colabList.map(([n,v],i)=>{
     const val=rankMode==='val'?v.total:v.qtd;
     const pct=(val/maxColab*100).toFixed(0);
@@ -1256,9 +1268,15 @@ function renderDashTaxas(){
   }).join('')}</div>`:'<div class="empty-state"><div class="icon">🔍</div><p>Nenhum resultado</p></div>';
 
   // Tabela mensal
-  // Monthly table uses all historical data
+  // Monthly table uses all historical data — derive mes if missing
   const allByMes={};
-  (LD('taxas')||TAXAS_HISTORICO).forEach(rec=>{const m=rec.mes;if(!allByMes[m])allByMes[m]={qtd:0,total:0};allByMes[m].qtd+=(rec.taxas||[]).length;allByMes[m].total+=rec.total;});
+  (LD('taxas')||TAXAS_HISTORICO).forEach(rec=>{
+    const m=rec.mes||getMesFromData(rec.data);
+    if(!m)return;
+    if(!allByMes[m])allByMes[m]={qtd:0,total:0};
+    allByMes[m].qtd+=(rec.taxas||[]).length;
+    allByMes[m].total+=rec.total||(rec.taxas||[]).reduce((a,t)=>a+(t.valor||0),0);
+  });
   const tableData=MESES_ORDER.filter(m=>allByMes[m]).map(m=>({mes:m,...allByMes[m]}));
   const totQtd=tableData.reduce((a,r)=>a+r.qtd,0);
   const totVal=tableData.reduce((a,r)=>a+r.total,0);
