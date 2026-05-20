@@ -2136,6 +2136,20 @@ function checkBtnMigrar(){
   if(LD('migracao_taxas_ok')){btn.textContent='✓ Já migrado';btn.disabled=true;btn.style.background='var(--gray)';}
 }
 
+// ═══ DATE HELPER ═══
+function parseData(d){
+  if(!d)return null;
+  const s=String(d);
+  if(s.match(/^\d{4}-\d{2}-\d{2}$/))return new Date(s+'T12:00:00');
+  const dt=new Date(d);
+  return isNaN(dt)?null:dt;
+}
+function fmtData(d, opts){
+  const dt=parseData(d);
+  if(!dt)return String(d||'—');
+  return dt.toLocaleDateString('pt-BR', opts||{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+}
+
 </script>
 
 <!-- ═══ TELA DE LOGIN ═══ -->
