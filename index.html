@@ -1258,13 +1258,29 @@ function renderDashTaxas(){
     const val=rankMode==='val'?v.total:v.qtd;
     const pct=(val/maxColab*100).toFixed(0);
     const display=rankMode==='val'?'R$ '+v.total.toLocaleString('pt-BR',{minimumFractionDigits:2}):v.qtd+'x';
-    return `<div class="ranking-item">
-      <div class="rank-pos ${rankClass(i)}">${i+1}</div>
+    // Monthly breakdown when searching specific collaborator
+  const mesBreakdown = showMonthly ? (()=>{
+    const byMes={};
+    rowsForRank.filter(r=>r.colaborador===n).forEach(r=>{
+      const m=r.mes||getMesFromData(r.data);
+      if(m){if(!byMes[m])byMes[m]={qtd:0,total:0};byMes[m].qtd++;byMes[m].total+=r.valor||0;}
+    });
+    const entries=MESES_ORDER.filter(m=>byMes[m]).map(m=>
+      '<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--parchment);color:var(--gray);margin-right:4px;display:inline-block;margin-bottom:3px;">'+
+      m.charAt(0)+m.slice(1).toLowerCase()+': <strong>R$ '+byMes[m].total.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong></span>'
+    );
+    return entries.length ? '<div style="margin-top:5px;flex-wrap:wrap;display:flex;gap:2px;">'+entries.join('')+'</div>' : '';
+  })() : '';
+  return `<div class="ranking-item" style="flex-wrap:wrap;">
+    <div class="rank-pos ${rankClass(i)}">${i+1}</div>
+    <div style="flex:1;min-width:120px;">
       <div class="rank-name" title="${n}">${n}</div>
-      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${SETOR_COLORS[v.setor]||'var(--teal)'}"></div></div>
-      <div class="rank-setor">${v.setor||'—'}</div>
-      <div class="rank-val">${display}</div>
-    </div>`;
+      ${mesBreakdown}
+    </div>
+    <div class="rank-bar-wrap" style="flex-basis:100px;"><div class="rank-bar" style="width:${pct}%;background:${SETOR_COLORS[v.setor]||'var(--teal)'}"></div></div>
+    <div class="rank-setor">${v.setor||'—'}</div>
+    <div class="rank-val">${display}</div>
+  </div>`;
   }).join('')}</div>`:'<div class="empty-state"><div class="icon">🔍</div><p>Nenhum resultado</p></div>';
 
   // Tabela mensal
