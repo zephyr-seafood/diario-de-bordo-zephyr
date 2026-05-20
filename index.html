@@ -235,6 +235,7 @@ body.view-mode .form-footer{display:none;}
   <div class="tab" data-tab="historico" onclick="switchTab('historico')">📁 Histórico</div>
   <div class="tab" data-tab="taxas" onclick="switchTab('taxas')">💰 Taxas</div>
   <div class="tab" data-tab="hist-taxas" onclick="switchTab('hist-taxas')">🗂 Hist. Taxas</div>
+  <div class="tab" data-tab="eventos" onclick="switchTab('eventos')">🎉 Eventos</div>
 </div>
 <main>
 
@@ -289,6 +290,23 @@ body.view-mode .form-footer{display:none;}
       <div class="tempo-item"><div class="tempo-label">Sushi</div><input type="number" class="tempo-input" id="t_sushi" placeholder="—" min="0"><div class="tempo-unit">min</div></div>
       <div class="tempo-item"><div class="tempo-label">Bar</div><input type="number" class="tempo-input" id="t_bar" placeholder="—" min="0"><div class="tempo-unit">min</div></div>
       <div class="tempo-item"><div class="tempo-label">Sobremesa</div><input type="number" class="tempo-input" id="t_sobremesa" placeholder="—" min="0"><div class="tempo-unit">min</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">👨‍🍳 Responsável por Setor</div>
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label>🍳 Cozinha — Responsável</label>
+        <input type="text" id="f_resp_cozinha" placeholder="Nome de quem estava à frente...">
+      </div>
+      <div class="form-group">
+        <label>🍣 Sushi — Responsável</label>
+        <input type="text" id="f_resp_sushi" placeholder="Nome de quem estava à frente...">
+      </div>
+      <div class="form-group">
+        <label>🍹 Bar — Responsável</label>
+        <input type="text" id="f_resp_bar" placeholder="Nome de quem estava à frente...">
+      </div>
     </div>
   </div>
   <div class="card">
@@ -503,6 +521,119 @@ body.view-mode .form-footer{display:none;}
   </div>
 </div>
 
+<!-- ════ ABA EVENTOS ════ -->
+<div class="page" id="page-eventos">
+  <div class="page-header"><div class="section-title">Controle de Eventos</div><div class="section-sub">Registre e acompanhe os eventos realizados</div></div>
+
+  <!-- Form registro -->
+  <div class="card">
+    <div class="card-title">🎉 Registrar Evento</div>
+    <div class="form-grid" style="margin-bottom:14px;">
+      <div class="form-group"><label>Data</label><input type="date" id="ev_data"></div>
+      <div class="form-group"><label>Tipo de Evento</label>
+        <select id="ev_tipo">
+          <option value="">Selecione...</option>
+          <option>Aniversário</option>
+          <option>Confraternização</option>
+          <option>Casamento</option>
+          <option>Corporativo</option>
+          <option>Formatura</option>
+          <option>Almoço Executivo</option>
+          <option>Jantar Especial</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Turno</label>
+        <div class="pill-group" id="ev_turno_pills">
+          <div class="pill" onclick="selectEvPill('ev_turno','Almoço',this)">☀️ Almoço</div>
+          <div class="pill" onclick="selectEvPill('ev_turno','Jantar',this)">🌙 Jantar</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-grid" style="margin-bottom:14px;">
+      <div class="form-group"><label>Tipo de Cardápio</label>
+        <select id="ev_cardapio">
+          <option value="">Selecione...</option>
+          <option>Menu Aberto</option>
+          <option>Menu Fechado</option>
+          <option>Finger Food</option>
+          <option>Coquetel Volante</option>
+          <option>Menu Personalizado</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Preço do Menu / Pessoa (R$)</label>
+        <input type="number" id="ev_preco_menu" placeholder="0,00" min="0" step="0.01" oninput="calcEvFaturamento()">
+      </div>
+      <div class="form-group"><label>Qtd Clientes</label>
+        <input type="number" id="ev_clientes" placeholder="0" min="0" oninput="calcEvFaturamento()">
+      </div>
+      <div class="form-group"><label>Faturamento Total (R$)</label>
+        <input type="number" id="ev_faturamento" placeholder="0,00" min="0" step="0.01" oninput="calcEvTicket()">
+      </div>
+      <div class="form-group"><label>Ticket Médio / Cliente</label>
+        <input type="text" id="ev_ticket" placeholder="—" readonly style="background:#f0f8f8;color:var(--teal);font-weight:700;">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px;"><label>Observação</label>
+      <textarea id="ev_obs" placeholder="Detalhes do evento, particularidades, montagem especial..."></textarea>
+    </div>
+    <div class="form-footer"><button class="btn-salvar" onclick="salvarEvento()">✓ Salvar Evento</button></div>
+  </div>
+
+  <!-- Filtro período -->
+  <div class="filtro-row">
+    <label>De:</label>
+    <input type="date" id="ev_de" onchange="renderEventos()" style="max-width:160px;">
+    <label>Até:</label>
+    <input type="date" id="ev_ate" onchange="renderEventos()" style="max-width:160px;">
+    <div class="filtro-sep"></div>
+    <label>Tipo:</label>
+    <select id="ev_filtro_tipo" onchange="renderEventos()">
+      <option value="">Todos</option>
+      <option>Aniversário</option><option>Confraternização</option><option>Casamento</option>
+      <option>Corporativo</option><option>Formatura</option><option>Almoço Executivo</option>
+      <option>Jantar Especial</option><option>Outro</option>
+    </select>
+    <div class="filtro-sep"></div>
+    <label>Cardápio:</label>
+    <select id="ev_filtro_cardapio" onchange="renderEventos()">
+      <option value="">Todos</option>
+      <option>Menu Aberto</option><option>Menu Fechado</option><option>Finger Food</option>
+      <option>Coquetel Volante</option><option>Menu Personalizado</option>
+    </select>
+    <button onclick="document.getElementById('ev_de').value='';document.getElementById('ev_ate').value='';renderEventos();" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;">✕ Limpar</button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;">
+    <div class="kpi-card kpi-teal"><div class="kpi-label">Total de Eventos</div><div class="kpi-value" id="ev_k1">0</div><div class="kpi-sub" id="ev_k1s">no período</div></div>
+    <div class="kpi-card kpi-gold"><div class="kpi-label">Total Clientes</div><div class="kpi-value" id="ev_k2">0</div><div class="kpi-sub">em eventos</div></div>
+    <div class="kpi-card kpi-green"><div class="kpi-label">Faturamento Total</div><div class="kpi-value" id="ev_k3">R$ 0</div><div class="kpi-sub" id="ev_k3s">acumulado</div></div>
+    <div class="kpi-card kpi-purple"><div class="kpi-label">Ticket Médio / Cliente</div><div class="kpi-value" id="ev_k4">R$ —</div><div class="kpi-sub">média geral</div></div>
+  </div>
+  <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px;">
+    <div class="kpi-card kpi-coral"><div class="kpi-label">Fat. Médio por Evento</div><div class="kpi-value" id="ev_k5">R$ —</div><div class="kpi-sub">média por evento</div></div>
+    <div class="kpi-card kpi-teal"><div class="kpi-label">Cardápio Mais Usado</div><div class="kpi-value" id="ev_k6" style="font-size:16px;">—</div><div class="kpi-sub" id="ev_k6s">—</div></div>
+    <div class="kpi-card kpi-gold"><div class="kpi-label">Mês com Mais Eventos</div><div class="kpi-value" id="ev_k7" style="font-size:16px;">—</div><div class="kpi-sub" id="ev_k7s">—</div></div>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="dash-grid">
+    <div class="card">
+      <div class="card-title">📊 Eventos por Tipo</div>
+      <div id="ev_chart_tipo"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🍽 Faturamento por Cardápio</div>
+      <div id="ev_chart_cardapio"></div>
+    </div>
+    <div class="card col-full">
+      <div class="card-title">📋 Histórico de Eventos</div>
+      <div id="ev_list"><div class="empty-state"><div class="icon">🎉</div><p>Nenhum evento registrado ainda</p></div></div>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <!-- MODAL NOVO COLABORADOR -->
@@ -586,7 +717,7 @@ const CARDAPIO = [
 ];
 
 const COLABORADORES = ["ABRAÃO","ADRIEL DA SILVA","ALAN GUEDES","ALINE","ALINE BETTIO","ALISON CUMIM","ALLAN CUMIM","ALVARO BAR","AMANDA EXTRA","ANA LOUÇA","ANANDA RECEPÇÃO","ANDERSON BAR","ARYADNE CAIXA","BARBARA EXTRA","BIANCA BAR","BRENDO","BRENDON BAR","BRIAN EXTRA SUSHI","BRUNA DA SILVA","BRUNA LEITE","BRUNO","CAIO GARÇOM","CAMILA RECEPÇÃO","CAROLINE AIRES","CAROLINE COZINHA SUB","CAROLINE SUB CHEFE","CHESMAN","CRISTIAN ALMORI","CRISTIAN CHEFE BAR","CRISTIAN DOS SANTOS","CRISTIANE PEREIRA","CRISSIANE PEREIRA","CRISTINA EXTRA","DANIELA","DENISE LIMPEZA","EBERSON EXTRA","EDUARDO BRAGA","ELISE EXTRA","ELOISA BAR","EMILY RECEPÇÃO","ENZO","ERIC EXTRA","ERICK COZINHA","EVELYN","FABIOLA RECEPÇÃO","FELIPE CUMIM","FERNANDA EXTRA","FERNANDA RECEPÇÃO","FRANCIELE RECEPÇÃO","FRANCISCA SEGUNDA","FRANCISCO CUMIM","GABRIEL CHEF COZINHA","GABRIEL CUMIM","GABRIEL DA SILVA","GABRIEL EUFRAZIO","GABRIEL MUNHOZ","GABRIEL SUSHI","GABRIEL VICENTE","GABRIELA RECEPÇÃO","GENARIO","GIOVANI CUMIM","GIOVANNI AURELIANO","GUILHERME BAR","GUILHERME CRUZ","GUILHERME EXTRA CUMIM","GUILHERME EXTRA SUSHI","GUILHERME SUSHI","HELOISA BAR","HUGO CUMIM","IDEVAN EXTRA SUSHI","IGOR CUMIM","IRANILSON EXTRA","ISABELA RECEPÇÃO","JAIME EXTRA","JAIME SALÃO SEGUNDA","JAISON BAR EXTRA","JAISON BAR SEGUNDA","JANE EXTRA","JEFFERSON COZINHA","JESSICA COZINHA","JHENIFFER ONESCO","JHON BAR EXTRA","JHON BAR SEGUNDA","JHONATAN EXTRA","JHONATA SALÃO SEGUNDA","JHONATA SUSHI","JOÃO EXTRA","JOÃO PEDRO COZINHA","JOÃO VITOR","JOSELIA LOUÇA","JULIA CUMIM","JULIANA LIMPEZA","JULIANNA BAZARELI","JULIO SUSHI","JUNIOR EXTRA","KAIQUE","KALISTON DE SOUZA","KALISTON DE SOUZA SEGUNDA","KAUE PINHEIRO","LARISSA RECEPÇÃO","LEANDRO CUMIM","LEOMAR COZINHA","LEOMAR COZINHA SEGUNDA","LEVI JUNIOR","LORAINE BAR","LORRAINE BAR","LUCAS CUMIM","LUCAS EXTRA","LUCAS EXTRA BAR","MAICON BAR","MAICON CUMIM","MANUELLA RECEPÇÃO","MARCOS EXTRA SUSHI","MARCOS SUSHI","MARISA COZINHA","MARISA SEGUNDA COZINHA","MATHEUS ARAUJO","MAXSUEL BAR","MICAEL COZINHA","MILENE EXTRA","MIRELI BAR","MYLENE MATOS","NEANDER COZINHA","NEANDE SEGUNDA","NILO SALÃO","NUBIA COZINHA","NUBIA SEGUNDA","PABLO COZINHA","PABLO DA SILVA","PABLO EXTRA","PABLO SALÃO SEGUNDA","PAULO ROSENDO","PAULO ROSENDO SEGUNDA","PEDRO EXTRA","PEDRO EXTRA SALÃO","PEDRO GARÇOM","RAFAEL SALÃO","RAIMUNDO COZINHA","RAYSA SALÃO","REBECA BUCKER","REJANE COZINHA","RENAN EXTRA","RODOLFO EXTRA","RODRIGO DE FREITAS","RODRIGO XAVIER","RODRIGO TESTE","RODRIGUES CUMIM","RONALDO LINHARES","RONALDO ZANCHE","ROSECLER DOS ANJOS","ROSECLER DOS SANTOS","ROSECLER SUB CHEFE","ROSIMERI","ROSSY BAR","RUBEM BAR","SAMUEL COZINHA","SAMUEL EXTRA","SANDY BAR","SANDY SANTOS EXTRA","SERGIO SUSHI","SIMONE COZINHA","SORAIA COZINHA","SORAIA SEGUNDA","SYMON SAIKI","SYMON SAIKI SEGUNDA","STEFANI COZINHA","STEFANI LOUÇA SEGUNDA","STEFFANY QUADROS","STELLA EXTRA","SUELLEN BANHEIRO","TAINA EXTRA BAR","TAMIRES COZINHA","THAIS EXTRA","THAIS LIMPEZA","THAMIRES","THIAGO EXTRA BAR","THIAGO COZINHA","THIAGO CUMIM","THIAGO EXTRA SALÃO","THIAGO PEREIRA","THUAN COZINHA","TIAGO EXTRA","TYSON BAR","VANDERSON BAR","VANDERSON GOMES","VICTOR DALVES","VICTOR SOUTO","VIMCIUS COZINHA","VINICIUS COZINHEIRO","VINICIUS CUMIM","VINICIUS EXTRA SALÃO","VINICIUS EXTRA SUSHI","VITOR SUSHIMAN","VIVIANE BAR","WALTER SOARES","WELLINGTON","WENDELL","WESLEY","WILLIAM BAR","WILLIAM MOURA SOMMELIER","WILLIAN CUMIM","WILLIAN NOVO","WILSON BAR SEGUNDA","WILSSON BAR","YURI BAR EXTRA","ZOE EXTRA","CRYSTIANO CAMARGO SUSHI"].sort();
-const SETORES = ["Salão","Cozinha","Bar","Sushi","Caixa","Serviços Gerais","Limpeza"];
+const SETORES = ["Salão","Cozinha","Bar","Sushi","Caixa","Serviços Gerais","Limpeza","Gerência"];
 
 // ═══ STATE ═══
 let ST = {turno:null,clima:null,faltasList:[],taxasRows:[],editId:null};
@@ -652,6 +783,7 @@ function switchTab(t){
   if(t==='feedback')setTimeout(checkTurnoHoje,100);
   if(t==='historico')renderHistorico();
   if(t==='hist-taxas'){renderHistTaxas();setTimeout(checkBtnMigrar,100);}
+  if(t==='eventos')renderEventos();
   if(t==='dash-taxas')renderDashTaxas();
   if(t==='dash-feedback')renderDashFeedback();
 }
@@ -698,7 +830,7 @@ function handleFaltaKey(e){
   else if(e.key==='Enter'&&acIdx>=0){its[acIdx].click();e.preventDefault();}
   else if(e.key==='Escape')dd.style.display='none';
 }
-function addFalta(nome,setor){ST.faltasList.push({nome,setor});document.getElementById('falta_input').value='';document.getElementById('falta_dropdown').style.display='none';renderFaltas();}
+function addFalta(nome,setor){ST.faltasList.push({nome,setor});document.getElementById('falta_input').value='';const _fd1=document.getElementById('falta_dropdown');if(_fd1)_fd1.style.display='none';renderFaltas();}
 function removeFalta(i){ST.faltasList.splice(i,1);renderFaltas();}
 function renderFaltas(){
   const c=document.getElementById('faltas_tags');
@@ -725,7 +857,7 @@ function renderFaltas(){
   });
   c.innerHTML=html;
 }
-document.addEventListener('click',e=>{if(!e.target.closest('.autocomplete-wrapper'))document.getElementById('falta_dropdown').style.display='none';});
+document.addEventListener('click',e=>{if(!e.target.closest('.autocomplete-wrapper')){const _fd2=document.getElementById('falta_dropdown');if(_fd2)_fd2.style.display='none';}});
 
 function salvarFeedback(){
   const data=document.getElementById('f_data').value;
@@ -746,7 +878,7 @@ function salvarFeedback(){
   ST.editId=null;resetFeedbackForm();
 }
 function resetFeedbackForm(){
-  ['f_data','f_faturamento','f_clientes','f_ticket','t_entradas','t_principal','t_sushi','t_bar','t_sobremesa','f_justificativa','f_reclamacoes','f_elogios'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['f_data','f_faturamento','f_clientes','f_ticket','t_entradas','t_principal','t_sushi','t_bar','t_sobremesa','f_justificativa','f_reclamacoes','f_elogios','f_resp_cozinha','f_resp_sushi','f_resp_bar'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('f_gerente').value='';ST.turno=null;ST.clima=null;ST.faltasList=[];ST.editId=null;
   document.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected'));renderFaltas();
 }
@@ -927,6 +1059,7 @@ function openModal(id){
       </div>
       ${tempoHtml?`<div class="modal-section"><div class="modal-section-title">Tempo Médio de Saída</div><div class="modal-grid">${tempoHtml}</div></div>`:''}
       ${faltasHtml?`<div class="modal-section"><div class="modal-section-title">Itens em Falta (${(f.faltas||[]).length})</div><div style="display:flex;flex-wrap:wrap;gap:7px;">${faltasHtml}</div></div>`:''}
+      ${(f.responsaveis&&(f.responsaveis.cozinha||f.responsaveis.sushi||f.responsaveis.bar))?`<div class="modal-section"><div class="modal-section-title">👨‍🍳 Responsável por Setor</div><div style="display:flex;gap:12px;flex-wrap:wrap;">${f.responsaveis.cozinha?`<span style="background:#fff3e0;color:#e65100;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;">🍳 Cozinha: ${f.responsaveis.cozinha}</span>`:''} ${f.responsaveis.sushi?`<span style="background:#e3f2fd;color:#1565c0;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;">🍣 Sushi: ${f.responsaveis.sushi}</span>`:''} ${f.responsaveis.bar?`<span style="background:#f3e5f5;color:#6a1b9a;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;">🍹 Bar: ${f.responsaveis.bar}</span>`:''}</div></div>`:''}
       ${f.justificativa?`<div class="modal-section"><div class="modal-section-title">📝 Justificativa das Faltas</div><p style="font-size:14px;line-height:1.6;color:var(--gray);font-style:italic;">${f.justificativa}</p></div>`:''}
       ${f.reclamacoes?`<div class="modal-section"><div class="modal-section-title">🔴 Reclamações</div><p style="font-size:14px;line-height:1.6;">${f.reclamacoes}</p></div>`:''}
       ${f.elogios?`<div class="modal-section"><div class="modal-section-title">🟢 Elogios</div><p style="font-size:14px;line-height:1.6;">${f.elogios}</p></div>`:''}
@@ -945,6 +1078,9 @@ function editFeedback(id){
     document.getElementById('t_sobremesa').value=f.tempos?.sobremesa||'';
     document.getElementById('f_justificativa').value=f.justificativa||'';
     document.getElementById('f_reclamacoes').value=f.reclamacoes||'';document.getElementById('f_elogios').value=f.elogios||'';
+    document.getElementById('f_resp_cozinha').value=f.responsaveis?.cozinha||'';
+    document.getElementById('f_resp_sushi').value=f.responsaveis?.sushi||'';
+    document.getElementById('f_resp_bar').value=f.responsaveis?.bar||'';
     ST.turno=f.turno;ST.clima=f.clima;ST.faltasList=[...(f.faltas||[])];ST.editId=id;
     calcTicket();renderFaltas();
     document.querySelectorAll('#turno_pills .pill').forEach(p=>{if(p.textContent.includes(f.turno))p.classList.add('selected');});
@@ -1409,7 +1545,7 @@ function showToast(msg,type='success'){
 // ═══ NOVO ITEM CARDÁPIO ═══
 let _niSetor = null;
 function abrirNovoItem(nome){
-  document.getElementById('falta_dropdown').style.display='none';
+  const _fd3=document.getElementById('falta_dropdown');if(_fd3)_fd3.style.display='none';
   document.getElementById('ni_nome').value=nome;
   _niSetor=null;
   document.querySelectorAll('#ni_setor_pills .pill').forEach(p=>p.classList.remove('selected'));
@@ -1497,14 +1633,14 @@ function fazerLogin(){
   const senha = document.getElementById('login_senha').value;
   const perfil = SENHAS[senha];
   if(!perfil){
-    document.getElementById('login_erro').style.display='block';
+    const _le=document.getElementById('login_erro');if(_le)_le.style.display='block';
     document.getElementById('login_senha').value='';
     document.getElementById('login_senha').focus();
     return;
   }
   _perfil = perfil;
   SD('zephyr_perfil', perfil);
-  document.getElementById('login_screen').style.display='none';
+  const _ls1=document.getElementById('login_screen');if(_ls1)_ls1.style.display='none';
   aplicarPerfil(perfil);
   adicionarBtnLogout();
   sincronizarSheets();
@@ -1547,7 +1683,7 @@ function fazerLogout(){
   _perfil=null;
   localStorage.removeItem('z_zephyr_perfil');
   document.getElementById('login_senha').value='';
-  document.getElementById('login_erro').style.display='none';
+  const _le2=document.getElementById('login_erro');if(_le2)_le2.style.display='none';
   const ls=document.getElementById('login_screen');if(ls)ls.style.display='flex';
   document.body.classList.remove('view-mode');
 }
@@ -1557,7 +1693,7 @@ function fazerLogout(){
   const perfil = LD('zephyr_perfil');
   if(perfil && SENHAS[Object.keys(SENHAS).find(k=>SENHAS[k]===perfil)||'']===perfil||Object.values(SENHAS).includes(perfil)){
     _perfil=perfil;
-    document.getElementById('login_screen').style.display='none';
+    const _ls2=document.getElementById('login_screen');if(_ls2)_ls2.style.display='none';
     aplicarPerfil(perfil);
     adicionarBtnLogout();
   } else {
@@ -1660,361 +1796,177 @@ function checkBtnMigrar(){
     btn.style.background='var(--gray)';
   }
 }
-// ═══ DATE HELPER ═══
-function parseData(d){
-  if(!d)return null;
-  const s=String(d);
-  if(s.match(/^\d{4}-\d{2}-\d{2}$/))return new Date(s+'T12:00:00');
-  const dt=new Date(d);
-  return isNaN(dt)?null:dt;
-}
-function fmtData(d, opts){
-  const dt=parseData(d);
-  if(!dt)return String(d||'—');
-  return dt.toLocaleDateString('pt-BR', opts||{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-}
 
-// ═══ INDICADOR TURNO EM ABERTO ═══
-let _ignorarAlerta = false;
-function checkTurnoHoje(){
-  if(_ignorarAlerta)return;
-  const hoje = new Date().toISOString().split('T')[0];
-  const fbs = LD('feedbacks')||[];
-  const hoje_regs = fbs.filter(f=>String(f.data).substring(0,10)===hoje);
-  const alerta = document.getElementById('turno_alerta');
-  if(!alerta)return;
-  if(hoje_regs.length>0){
-    const nomes = hoje_regs.map(f=>f.turno+' ('+f.gerente+')').join(', ');
-    const alertaTxt=document.getElementById('turno_alerta_txt');if(alertaTxt)alertaTxt.textContent='Já registrado: '+nomes;
-    alerta.style.display='flex';
-    alerta._regs = hoje_regs;
-  } else {
-    alerta.style.display='none';
+// ═══ EVENTOS ═══
+let ST_ev = {turno: null, editId: null};
+const MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function selectEvPill(field, val, el){
+  ST_ev[field]=val;
+  el.parentElement.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function calcEvFaturamento(){
+  const preco=parseFloat(document.getElementById('ev_preco_menu').value)||0;
+  const cli=parseInt(document.getElementById('ev_clientes').value)||0;
+  if(preco>0&&cli>0){
+    document.getElementById('ev_faturamento').value=(preco*cli).toFixed(2);
   }
+  calcEvTicket();
 }
-function editarTurnoExistente(){
-  const alerta = document.getElementById('turno_alerta');
-  const regs = alerta._regs||[];
-  if(regs.length===1){
-    editFeedback(regs[0].id);
-  } else {
-    // Multiple records today — show which to edit
-    const escolha = regs.map((r,i)=>(i+1)+') '+r.turno+' — '+r.gerente).join('\n');
-    const idx = prompt('Qual registro editar?\n'+escolha+'\n\nDigite o número:');
-    if(idx&&regs[parseInt(idx)-1]) editFeedback(regs[parseInt(idx)-1].id);
-  }
-  alerta.style.display='none';
+function calcEvTicket(){
+  const f=parseFloat(document.getElementById('ev_faturamento').value)||0;
+  const c=parseInt(document.getElementById('ev_clientes').value)||0;
+  document.getElementById('ev_ticket').value=c>0?'R$ '+(f/c).toFixed(2).replace('.',','):'—';
 }
-function ignorarAlerta(){
-  _ignorarAlerta=true;
-  document.getElementById('turno_alerta').style.display='none';
+function salvarEvento(){
+  const data=document.getElementById('ev_data').value;
+  if(!data)return showToast('⚠️ Selecione a data','error');
+  if(!document.getElementById('ev_tipo').value)return showToast('⚠️ Selecione o tipo de evento','error');
+  const fat=parseFloat(document.getElementById('ev_faturamento').value)||0;
+  const cli=parseInt(document.getElementById('ev_clientes').value)||0;
+  const rec={
+    id:ST_ev.editId||Date.now(), data,
+    tipo:document.getElementById('ev_tipo').value,
+    turno:ST_ev.turno||'',
+    cardapio:document.getElementById('ev_cardapio').value||'',
+    precoMenu:parseFloat(document.getElementById('ev_preco_menu').value)||0,
+    clientes:cli, faturamento:fat,
+    ticket:cli>0?fat/cli:0,
+    obs:document.getElementById('ev_obs').value||''
+  };
+  const evs=LD('eventos')||[];
+  if(ST_ev.editId){const idx=evs.findIndex(e=>e.id===ST_ev.editId);if(idx>=0)evs[idx]=rec;else evs.push(rec);}
+  else evs.push(rec);
+  SD('eventos',evs);
+  showToast('✓ Evento salvo!','success');
+  ST_ev={turno:null,editId:null};
+  ['ev_data','ev_faturamento','ev_clientes','ev_ticket','ev_obs','ev_preco_menu'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ev_tipo').value='';
+  document.getElementById('ev_cardapio').value='';
+  document.querySelectorAll('#ev_turno_pills .pill').forEach(p=>p.classList.remove('selected'));
+  renderEventos();
 }
 
-// ═══ HISTÓRICO TAXAS ═══
-function renderHistTaxas(){
-  const allTaxas=LD('taxas')||TAXAS_HISTORICO;
-  const de=document.getElementById('ht_de').value;
-  const ate=document.getElementById('ht_ate').value;
-  const setor=document.getElementById('ht_setor').value;
-  const busca=(document.getElementById('ht_busca').value||'').toLowerCase();
-
-  // Group by date record
-  let recs=allTaxas.filter(rec=>{
-    if(!rec||!rec.data)return false;
-    // Date filters
-    const dataStr=String(rec.data).substring(0,10);
+function renderEventos(){
+  const all=(LD('eventos')||[]).sort((a,b)=>b.data.localeCompare(a.data));
+  // Filters
+  const de=document.getElementById('ev_de')?.value||'';
+  const ate=document.getElementById('ev_ate')?.value||'';
+  const filtTipo=document.getElementById('ev_filtro_tipo')?.value||'';
+  const filtCard=document.getElementById('ev_filtro_cardapio')?.value||'';
+  const evs=all.filter(e=>{
+    const dataStr=String(e.data).substring(0,10);
     if(de&&dataStr<de)return false;
     if(ate&&dataStr>ate)return false;
-    // If no setor/busca filter, show all records
-    if(!setor&&!busca)return true;
-    // Filter by taxa content
-    const taxas=rec.taxas||[];
-    if(!taxas.length)return false;
-    return taxas.some(tx=>{
-      if(setor&&tx.setor!==setor)return false;
-      if(busca&&!(tx.colaborador||'').toLowerCase().includes(busca))return false;
-      return true;
-    });
-  }).sort((a,b)=>String(b.data).localeCompare(String(a.data)));
+    if(filtTipo&&e.tipo!==filtTipo)return false;
+    if(filtCard&&e.cardapio!==filtCard)return false;
+    return true;
+  });
 
-  const total=recs.length;
-  const pages=Math.max(1,Math.ceil(total/HT_PP));
-  htPage=Math.min(htPage,pages);
-  const slice=recs.slice((htPage-1)*HT_PP, htPage*HT_PP);
+  // KPIs
+  const totFat=evs.reduce((a,e)=>a+(e.faturamento||0),0);
+  const totCli=evs.reduce((a,e)=>a+(e.clientes||0),0);
+  document.getElementById('ev_k1').textContent=evs.length;
+  document.getElementById('ev_k1s').textContent=evs.length===1?'evento':'eventos';
+  document.getElementById('ev_k2').textContent=totCli.toLocaleString('pt-BR');
+  document.getElementById('ev_k3').textContent='R$ '+totFat.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('ev_k3s').textContent=evs.length>0?'em '+evs.length+' eventos':'acumulado';
+  document.getElementById('ev_k4').textContent=totCli>0?'R$ '+(totFat/totCli).toFixed(2).replace('.',','):'R$ —';
+  document.getElementById('ev_k5').textContent=evs.length>0?'R$ '+(totFat/evs.length).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'R$ —';
 
-  const container=document.getElementById('ht_list');
-  if(!slice.length){
-    container.innerHTML='<div class="empty-state"><div class="icon">🗂</div><p>Nenhum registro encontrado</p></div>';
-    document.getElementById('ht_pagination').innerHTML='';
-    return;
-  }
+  // Cardápio mais usado
+  const byCard={};
+  evs.forEach(e=>{if(e.cardapio)byCard[e.cardapio]=(byCard[e.cardapio]||0)+1;});
+  const topCard=Object.entries(byCard).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('ev_k6').textContent=topCard?topCard[0]:'—';
+  document.getElementById('ev_k6s').textContent=topCard?topCard[1]+' evento'+(topCard[1]!==1?'s':''):'sem dados';
 
-  const setor_colors={'Salão':{bg:'#e8f4f4',cor:'#1a6b6b'},'Cozinha':{bg:'#fff3e0',cor:'#e65100'},'Bar':{bg:'#f3e5f5',cor:'#6a1b9a'},'Sushi':{bg:'#e3f2fd',cor:'#1565c0'},'Serviços Gerais':{bg:'#f1f8e9',cor:'#558b2f'},'Caixa':{bg:'#fdf6e3',cor:'#b8882a'}};
+  // Mês com mais eventos
+  const byMes={};
+  evs.forEach(e=>{const d=parseData(e.data);if(d){const m=MESES_PT[d.getMonth()];byMes[m]=(byMes[m]||0)+1;}});
+  const topMes=Object.entries(byMes).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('ev_k7').textContent=topMes?topMes[0]:'—';
+  document.getElementById('ev_k7s').textContent=topMes?topMes[1]+' evento'+(topMes[1]!==1?'s':''):'sem dados';
 
-  container.innerHTML=slice.map(rec=>{
-    const ds=fmtData(rec.data);
-    const taxasFilt=(rec.taxas||[]).filter(tx=>{
-      if(setor&&tx.setor!==setor)return false;
-      if(busca&&!tx.colaborador.toLowerCase().includes(busca))return false;
-      return true;
-    });
-    const totalRec=taxasFilt.reduce((a,t)=>a+(t.valor||0),0);
+  // Gráfico por tipo
+  const byTipo={};
+  evs.forEach(e=>{if(!byTipo[e.tipo])byTipo[e.tipo]={qtd:0,fat:0};byTipo[e.tipo].qtd++;byTipo[e.tipo].fat+=e.faturamento||0;});
+  const tipoList=Object.entries(byTipo).sort((a,b)=>b[1].qtd-a[1].qtd);
+  const maxTipo=Math.max(...tipoList.map(([,v])=>v.qtd),1);
+  const tipoColors=['var(--teal)','var(--gold)','var(--purple)','var(--coral)','var(--green)'];
+  document.getElementById('ev_chart_tipo').innerHTML=tipoList.length?
+    '<div class="bar-chart">'+tipoList.map(([tipo,v],i)=>
+      '<div class="bar-row"><div class="bar-label-col" style="width:120px;" title="'+tipo+'">'+tipo+'</div>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+(v.qtd/maxTipo*100).toFixed(0)+'%;background:'+tipoColors[i%5]+';">'+
+      '<span class="bar-val">'+v.qtd+'x</span></div></div>'+
+      '<span style="font-size:11px;color:var(--gray);width:90px;text-align:right;flex-shrink:0;">R$ '+v.fat.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})+'</span></div>'
+    ).join('')+'</div>':
+    '<div class="empty-state" style="padding:20px;"><p>Sem dados</p></div>';
+
+  // Gráfico por cardápio
+  const byCardFat={};
+  evs.forEach(e=>{if(e.cardapio){if(!byCardFat[e.cardapio])byCardFat[e.cardapio]={qtd:0,fat:0,precos:[]};byCardFat[e.cardapio].qtd++;byCardFat[e.cardapio].fat+=e.faturamento||0;if(e.precoMenu)byCardFat[e.cardapio].precos.push(e.precoMenu);}});
+  const cardList=Object.entries(byCardFat).sort((a,b)=>b[1].fat-a[1].fat);
+  const maxCard=Math.max(...cardList.map(([,v])=>v.fat),1);
+  document.getElementById('ev_chart_cardapio').innerHTML=cardList.length?
+    '<div class="bar-chart">'+cardList.map(([card,v],i)=>{
+      const avgPreco=v.precos.length>0?(v.precos.reduce((a,b)=>a+b,0)/v.precos.length).toFixed(2).replace('.',','):'—';
+      return '<div class="bar-row"><div class="bar-label-col" style="width:130px;" title="'+card+'">'+card+'</div>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+(v.fat/maxCard*100).toFixed(0)+'%;background:'+tipoColors[i%5]+';">'+
+      '<span class="bar-val">R$ '+v.fat.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})+'</span></div></div>'+
+      '<span style="font-size:10px;color:var(--gray);width:80px;text-align:right;flex-shrink:0;">R$'+avgPreco+'/p</span></div>';
+    }).join('')+'</div>':
+    '<div class="empty-state" style="padding:20px;"><p>Sem dados</p></div>';
+
+  // Lista histórico
+  const el=document.getElementById('ev_list');
+  if(!evs.length){el.innerHTML='<div class="empty-state"><div class="icon">🎉</div><p>Nenhum evento no período</p></div>';return;}
+  el.innerHTML=evs.map(e=>{
+    const ds=fmtData(e.data,{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
     return '<div class="hist-item">'+
       '<div class="hist-header">'+
-        '<div><div class="hist-date">'+ds+'</div></div>'+
+        '<div>'+
+          '<div class="hist-date">'+ds+'</div>'+
+          '<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">'+
+            '<span class="badge badge-almoco">'+e.tipo+'</span>'+
+            (e.turno?'<span class="badge '+(e.turno==='Almoço'?'badge-almoco':'badge-jantar')+'">'+e.turno+'</span>':'')+
+            (e.cardapio?'<span class="badge badge-gerente">'+e.cardapio+'</span>':'')+
+          '</div>'+
+        '</div>'+
         '<div style="display:flex;gap:8px;align-items:center;">'+
-          '<span style="font-size:13px;font-weight:700;color:var(--teal);">R$ '+totalRec.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span>'+
-          '<span style="font-size:12px;color:var(--gray);">'+taxasFilt.length+' colaborador'+( taxasFilt.length!==1?'es':'')+'</span>'+
-          (!isView?'<button onclick="editarTaxa(\''+rec.id+'\')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>':'')+
+          '<div style="text-align:right;">'+
+            '<div style="font-size:16px;font-weight:700;color:var(--teal);">R$ '+(e.faturamento||0).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
+            '<div style="font-size:11px;color:var(--gray);">'+(e.clientes||0)+' clientes'+(e.precoMenu?' · R$'+e.precoMenu.toFixed(2).replace('.',',')+'/p':'')+'</div>'+
+          '</div>'+
+          (!isView?'<button onclick="deletarEvento('+e.id+')" class="btn-remove" style="padding:6px 10px;">🗑</button>':'')+
         '</div>'+
       '</div>'+
-      '<div style="display:flex;flex-wrap:wrap;gap:6px;">'+
-        taxasFilt.map(tx=>{
-          const cfg=setor_colors[tx.setor]||{bg:'#f5f5f5',cor:'#555'};
-          return '<span style="font-size:11px;padding:3px 10px;border-radius:20px;background:'+cfg.bg+';color:'+cfg.cor+';font-weight:500;">'+tx.colaborador+(tx.valor?' · R$ '+tx.valor.toFixed(0):'')+'</span>';
-        }).join('')+
-      '</div>'+
+      (e.obs?'<div style="font-size:12px;color:var(--gray);font-style:italic;margin-top:6px;">'+e.obs+'</div>':'')+
     '</div>';
   }).join('');
-
-  // Pagination
-  const pag=document.getElementById('ht_pagination');
-  if(pages<=1){pag.innerHTML='<div class="page-info">'+total+' registro(s)</div>';return;}
-  let btns='<div class="page-info">'+total+' dia(s)</div>';
-  if(htPage>1)btns+='<button class="page-btn" onclick="htGoPage('+( htPage-1)+')">‹</button>';
-  const s=Math.max(1,htPage-2),en=Math.min(pages,htPage+2);
-  for(let i=s;i<=en;i++)btns+='<button class="page-btn'+(i===htPage?' active':'')+'" onclick="htGoPage('+i+')">'+i+'</button>';
-  if(htPage<pages)btns+='<button class="page-btn" onclick="htGoPage('+( htPage+1)+')">›</button>';
-  pag.innerHTML=btns;
-}
-function htGoPage(p){htPage=p;renderHistTaxas();document.getElementById('ht_list').scrollIntoView({behavior:'smooth'});}
-
-function editarTaxa(recId){
-  const allTaxas=LD('taxas')||[];
-  const rec=allTaxas.find(r=>String(r.id)===String(recId));
-  if(!rec)return showToast('⚠️ Registro não encontrado','error');
-  // Load into taxa form
-  document.getElementById('taxa_data').value=rec.data;
-  ST.taxasRows=rec.taxas.map(tx=>({...tx,id:Date.now()+Math.random()}));
-  ST._editTaxaId=rec.id;
-  switchTab('taxas');
-  renderTaxaRows();
-  showToast('✏️ Editando taxas de '+new Date(rec.data+'T12:00:00').toLocaleDateString('pt-BR')+' — salve para confirmar','success');
 }
 
-// ═══ EXPORTAR PDF ═══
-function exportarPDF(){
-  const mes=document.getElementById('dt_mes').value;
-  const setor=document.getElementById('dt_setor').value;
-  const data=document.getElementById('dt_data').value;
-  const rows=getTaxasFiltered();
-  if(!rows.length)return showToast('⚠️ Nenhum dado para exportar','error');
-
-  const total=rows.reduce((a,r)=>a+(Math.min(parseFloat(r.valor)||0,9999)),0);
-  const dtFmt=d=>fmtData(d,{weekday:'short',day:'2-digit',month:'short'});
-  const titulo=data?'Taxas — '+new Date(data+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}):(mes?'Taxas — '+mes.charAt(0)+mes.slice(1).toLowerCase():'Taxas — Período Completo');
-
-  const rowsSorted=[...rows].sort((a,b)=>b.data.localeCompare(a.data));
-  const linhas=rowsSorted.map((r,i)=>
-    '<tr style="background:'+( i%2===0?'#fff':'#f9f5ee')+'">'+
-    '<td style="padding:7px 10px;border-bottom:1px solid #e0e0e0;">'+dtFmt(r.data)+'</td>'+
-    '<td style="padding:7px 10px;border-bottom:1px solid #e0e0e0;font-weight:500;">'+r.colaborador+'</td>'+
-    '<td style="padding:7px 10px;border-bottom:1px solid #e0e0e0;">'+r.setor+'</td>'+
-    '<td style="padding:7px 10px;border-bottom:1px solid #e0e0e0;">'+( r.tipo||'—')+'</td>'+
-    '<td style="padding:7px 10px;border-bottom:1px solid #e0e0e0;text-align:center;">'+( r.modo==='fechado'?'Fechado':( r.horas?(()=>{const h=Math.floor(r.horas);const m=Math.round((r.horas-h)*60);return h+'h'+(m>0?m+'m':'');})():'—'))+'</td>'+
-    '<td style="padding:7px 10px;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:700;color:#1a6b6b;">R$ '+(r.valor||0).toFixed(2).replace('.',',')+'</td>'+
-    '</tr>'
-  ).join('');
-
-  // Group total by setor
-  const bySetor={};
-  rows.forEach(r=>{if(!bySetor[r.setor])bySetor[r.setor]=0;bySetor[r.setor]+=r.valor||0;});
-  const setorRows=Object.entries(bySetor).sort((a,b)=>b[1]-a[1]).map(([s,v])=>
-    '<tr><td style="padding:5px 10px;">'+s+'</td><td style="padding:5px 10px;text-align:right;font-weight:700;">R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</td></tr>'
-  ).join('');
-
-  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
-  <title>Zephyr · ${titulo}</title>
-  <style>
-    body{font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:30px;color:#0f0f0f;font-size:13px;}
-    h1{font-size:22px;color:#074759;margin-bottom:4px;}
-    .sub{color:#888;font-size:12px;margin-bottom:24px;}
-    .kpi-row{display:flex;gap:16px;margin-bottom:24px;}
-    .kpi{background:#f9f5ee;border-radius:10px;padding:14px 18px;flex:1;border-left:4px solid #074759;}
-    .kpi-val{font-size:22px;font-weight:700;color:#074759;}
-    .kpi-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:4px;}
-    table{width:100%;border-collapse:collapse;margin-bottom:24px;}
-    th{background:#074759;color:#fff;padding:9px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.8px;}
-    th:last-child{text-align:right;}
-    .total-row td{background:#074759;color:#fff;font-weight:700;padding:9px 10px;}
-    .section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#074759;margin:20px 0 10px;padding-bottom:5px;border-bottom:2px solid #074759;}
-    .resumo-table{width:50%;}
-    @media print{body{padding:15px;}}
-  </style></head><body>
-  <h1>ZEPHYR · Controle de Taxas</h1>
-  <div class="sub">${titulo} · Gerado em ${new Date().toLocaleString('pt-BR')}</div>
-  <div class="kpi-row">
-    <div class="kpi"><div class="kpi-lbl">Total Pago</div><div class="kpi-val">R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
-    <div class="kpi"><div class="kpi-lbl">Qtd Registros</div><div class="kpi-val">${rows.length}</div></div>
-    <div class="kpi"><div class="kpi-lbl">Custo Médio</div><div class="kpi-val">R$ ${(total/rows.length).toFixed(2).replace('.',',')}</div></div>
-    <div class="kpi"><div class="kpi-lbl">Colaboradores</div><div class="kpi-val">${new Set(rows.map(r=>r.colaborador)).size}</div></div>
-  </div>
-  <div class="section-title">Detalhamento por Colaborador</div>
-  <table><thead><tr><th>Data</th><th>Colaborador</th><th>Setor</th><th>Tipo</th><th>Horas</th><th>Total</th></tr></thead>
-  <tbody>${linhas}<tr class="total-row"><td colspan="5">TOTAL (${rows.length} registros)</td><td style="text-align:right;">R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr></tbody></table>
-  <div class="section-title">Resumo por Setor</div>
-  <table class="resumo-table"><thead><tr><th>Setor</th><th>Total</th></tr></thead><tbody>${setorRows}</tbody></table>
-
-  
-<!-- ═══ TELA DE LOGIN ═══ -->
-<div id="login_screen" style="position:fixed;inset:0;background:var(--brand);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;">
-  <div style="background:var(--white);border-radius:24px;padding:40px 36px;max-width:380px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
-    <!-- Logo -->
-    <div style="text-align:center;margin-bottom:32px;">
-      <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;letter-spacing:3px;color:var(--brand);">ZEPHYR</div>
-      <div style="font-size:11px;letter-spacing:4px;color:var(--gray);margin-top:2px;">SEAFOOD & NIKKEI</div>
-      <div style="width:40px;height:2px;background:var(--gold);margin:12px auto 0;border-radius:2px;"></div>
-      <div style="font-size:13px;color:var(--gray);margin-top:16px;">Diário de Bordo</div>
-    </div>
-    <!-- Form -->
-    <div class="form-group" style="margin-bottom:20px;">
-      <label style="font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;">Senha de Acesso</label>
-      <div style="position:relative;">
-        <input type="password" id="login_senha" placeholder="Digite sua senha..." 
-          style="padding:12px 44px 12px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;width:100%;background:var(--parchment);outline:none;font-family:inherit;"
-          onkeydown="if(event.key==='Enter')fazerLogin()">
-        <span onclick="toggleSenha()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;color:var(--gray);" id="senha_eye">👁</span>
-      </div>
-    </div>
-    <div id="login_erro" style="display:none;background:#fff5f5;border:1px solid #ffcdd2;color:var(--coral);font-size:12px;padding:10px 14px;border-radius:8px;margin-bottom:16px;text-align:center;">
-      ❌ Senha incorreta. Tente novamente.
-    </div>
-    <button onclick="fazerLogin()" style="background:var(--brand);color:var(--white);border:none;padding:14px;border-radius:12px;font-family:inherit;font-size:15px;font-weight:600;width:100%;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(7,71,89,0.3);">
-      Entrar
-    </button>
-    <p style="text-align:center;font-size:11px;color:var(--gray-light);margin-top:20px;">Diário de Bordo Zephyr · Uso interno</p>
-  </div>
-</div>
-
-</body></html>`;
-
-  // Hide login screen to avoid it showing in PDF
-  const loginScreen = document.getElementById('login_screen');
-  try { if(loginScreen) loginScreen.style.display='none'; } catch(e){}
-  const w=window.open('','_blank');
-  w.document.write(html);
-  w.document.close();
-  setTimeout(()=>w.print(), 500);
+function deletarEvento(id){
+  if(!confirm('Excluir este evento?'))return;
+  let evs=LD('eventos')||[];evs=evs.filter(e=>e.id!==id);SD('eventos',evs);
+  renderEventos();showToast('🗑 Excluído','success');
 }
-
-
-// ═══ SINCRONIZAR COM GOOGLE SHEETS ═══
-async function sincronizarSheets(){
-  const btn=document.getElementById('sync_btn');
-  btn.textContent='⏳ Sincronizando...';
-  btn.style.opacity='0.7';
-  btn.disabled=true;
-  try {
-    const r = await apiGet('tudo');
-    if(!r.ok) throw new Error(r.erro||'Erro desconhecido');
-    const {feedbacks, taxas, colaboradores} = r.data;
-    // Merge: Sheets data wins for existing IDs, keep local-only records
-    if(feedbacks && feedbacks.length){
-      // Sanitize numeric fields from Sheets
-      const fbsSanitizados = feedbacks.map(f=>({
-        ...f,
-        faturamento: Math.min(parseFloat(String(f.faturamento).replace(',','.'))||0, 999999),
-        clientes: Math.min(parseInt(f.clientes)||0, 9999),
-        ticket: (()=>{
-          const t = parseFloat(String(f.ticket).replace(',','.'));
-          return (!isNaN(t) && t < 100000) ? t : 0;
-        })(),
-        tempos: {
-          entradas:  f.tempos?.entradas  ? Math.min(parseInt(f.tempos.entradas),999)  : null,
-          principal: f.tempos?.principal ? Math.min(parseInt(f.tempos.principal),999) : null,
-          sushi:     f.tempos?.sushi     ? Math.min(parseInt(f.tempos.sushi),999)     : null,
-          bar:       f.tempos?.bar       ? Math.min(parseInt(f.tempos.bar),999)       : null,
-          sobremesa: f.tempos?.sobremesa ? Math.min(parseInt(f.tempos.sobremesa),999) : null,
-        }
-      }));
-      const localFbs = LD('feedbacks')||[];
-      const sheetsIds = new Set(fbsSanitizados.map(f=>String(f.id)));
-      const localOnly = localFbs.filter(f=>!sheetsIds.has(String(f.id)));
-      SD('feedbacks', [...fbsSanitizados, ...localOnly]);
-    }
-    if(taxas && taxas.length){
-      // Sanitize valores vindos do Sheets — máximo R$5.000 por taxa
-      const taxasSanitizadas = taxas.map(rec=>({
-        ...rec,
-        total: (()=>{const t=parseFloat(String(rec.total).replace(',','.'));return(!isNaN(t)&&t<50000)?t:0;})(),
-        taxas: (rec.taxas||[]).map(tx=>({
-          ...tx,
-          valor: (()=>{const v=parseFloat(String(tx.valor).replace(',','.'));return(!isNaN(v)&&v<5000)?v:0;})(),
-          vh: (()=>{const v=parseFloat(String(tx.vh).replace(',','.'));return(!isNaN(v)&&v<1000)?v:0;})(),
-          horas: (()=>{const v=parseFloat(String(tx.horas).replace(',','.'));return(!isNaN(v)&&v<=24)?v:0;})(),
-          valorFechado: (()=>{const v=parseFloat(String(tx.valorFechado||0).replace(',','.'));return(!isNaN(v)&&v<5000)?v:0;})(),
-        }))
-      }));
-      const localTxs = LD('taxas')||[];
-      // Recalculate totals after sanitizing
-      taxasSanitizadas.forEach(rec=>{rec.total=rec.taxas.reduce((a,tx)=>a+(tx.valor||0),0);});
-      const sheetsIds = new Set(taxasSanitizadas.map(t=>String(t.id)));
-      const localOnly = localTxs.filter(t=>!sheetsIds.has(String(t.id)));
-      SD('taxas', [...taxasSanitizadas, ...localOnly]);
-    }
-    // If Sheets taxas is empty, keep local data intact
-    else {
-      const localTxs = LD('taxas')||[];
-      if(!localTxs.length) SD('taxas', TAXAS_HISTORICO);
-    }
-    if(colaboradores && colaboradores.length){
-      const extras = colaboradores.map(c=>c.nome);
-      const existing = LD('colab_extras')||[];
-      const merged = [...new Set([...existing, ...extras])];
-      SD('colab_extras', merged);
-      merged.forEach(n=>{if(!COLABORADORES.includes(n))COLABORADORES.push(n);});
-      COLABORADORES.sort();
-    }
-    showToast('✓ Sincronizado com Google Sheets!','success');
-    // Refresh current tab
-    const activeTab = document.querySelector('.tab.active')?.dataset?.tab;
-    if(activeTab==='historico') renderHistorico();
-    if(activeTab==='hist-taxas') renderHistTaxas();
-    if(activeTab==='dash-feedback') renderDashFeedback();
-    if(activeTab==='dash-taxas') renderDashTaxas();
-  } catch(e) {
-    showToast('⚠️ Erro ao sincronizar: '+e.message,'error');
-  } finally {
-    btn.textContent='🔄 Sincronizar';
-    btn.style.opacity='1';
-    btn.disabled=false;
-  }
-}
-
-// Auto-sync on load
-window.addEventListener('load', ()=>setTimeout(()=>{try{sincronizarSheets();}catch(e){console.error('Sync error:',e);}}, 1500));
-
-// Init
-document.getElementById('f_data').valueAsDate=new Date();
-document.getElementById('taxa_data').valueAsDate=new Date();
-renderTaxaRows();renderFaltas();setTimeout(()=>{try{checkTurnoHoje();}catch(e){}},300);
 </script>
 
 <!-- ═══ TELA DE LOGIN ═══ -->
 <div id="login_screen" style="position:fixed;inset:0;background:var(--brand);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;">
   <div style="background:var(--white);border-radius:24px;padding:40px 36px;max-width:380px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
-    <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;letter-spacing:3px;color:var(--brand);">ZEPHYR</div>
       <div style="font-size:11px;letter-spacing:4px;color:var(--gray);margin-top:2px;">SEAFOOD & NIKKEI</div>
       <div style="width:40px;height:2px;background:var(--gold);margin:12px auto 0;border-radius:2px;"></div>
       <div style="font-size:13px;color:var(--gray);margin-top:16px;">Diário de Bordo</div>
     </div>
-    <!-- Form -->
     <div class="form-group" style="margin-bottom:20px;">
       <label style="font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;">Senha de Acesso</label>
       <div style="position:relative;">
-        <input type="password" id="login_senha" placeholder="Digite sua senha..." 
+        <input type="password" id="login_senha" placeholder="Digite sua senha..."
           style="padding:12px 44px 12px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;width:100%;background:var(--parchment);outline:none;font-family:inherit;"
           onkeydown="if(event.key==='Enter')fazerLogin()">
         <span onclick="toggleSenha()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;color:var(--gray);" id="senha_eye">👁</span>
