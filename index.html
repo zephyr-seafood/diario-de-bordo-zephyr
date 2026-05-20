@@ -265,12 +265,14 @@ body.view-mode .form-footer{display:none;}
         <select id="f_gerente"><option value="">Selecione...</option><option>Cristiane</option><option>Crissia</option><option>Cristiane e Crissia</option><option>Aline Bettio</option><option>William Moura</option><option>Op. Caixa</option></select>
       </div>
       <div class="form-group"><label>Clima</label>
-        <div class="pill-group" id="clima_pills">
-          <div class="pill" onclick="selectPill('clima','☀️ Ensolarado',this)">☀️</div>
-          <div class="pill" onclick="selectPill('clima','⛅ Nublado',this)">⛅</div>
-          <div class="pill" onclick="selectPill('clima','🌧️ Chuvoso',this)">🌧️</div>
-          <div class="pill" onclick="selectPill('clima','⛈️ Tempestade',this)">⛈️</div>
-        </div>
+        <select id="f_clima" onchange="ST.clima=this.value">
+          <option value="">Selecione...</option>
+          <option value="☀️ Ensolarado">☀️ Ensolarado</option>
+          <option value="⛅ Nublado">⛅ Nublado</option>
+          <option value="🌧️ Chuvoso">🌧️ Chuvoso</option>
+          <option value="⛈️ Tempestade">⛈️ Tempestade</option>
+          <option value="🥶 Frio">🥶 Frio</option>
+        </select>
       </div>
     </div>
   </div>
@@ -880,7 +882,8 @@ function salvarFeedback(){
 function resetFeedbackForm(){
   ['f_data','f_faturamento','f_clientes','f_ticket','t_entradas','t_principal','t_sushi','t_bar','t_sobremesa','f_justificativa','f_reclamacoes','f_elogios','f_resp_cozinha','f_resp_sushi','f_resp_bar'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('f_gerente').value='';ST.turno=null;ST.clima=null;ST.faltasList=[];ST.editId=null;
-  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected'));renderFaltas();
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected'));
+  const climaEl=document.getElementById('f_clima');if(climaEl)climaEl.value='';renderFaltas();
 }
 
 // Taxas
@@ -1082,9 +1085,9 @@ function editFeedback(id){
     document.getElementById('f_resp_sushi').value=f.responsaveis?.sushi||'';
     document.getElementById('f_resp_bar').value=f.responsaveis?.bar||'';
     ST.turno=f.turno;ST.clima=f.clima;ST.faltasList=[...(f.faltas||[])];ST.editId=id;
+    const climaEl2=document.getElementById('f_clima');if(climaEl2)climaEl2.value=f.clima||'';
     calcTicket();renderFaltas();
     document.querySelectorAll('#turno_pills .pill').forEach(p=>{if(p.textContent.includes(f.turno))p.classList.add('selected');});
-    document.querySelectorAll('#clima_pills .pill').forEach(p=>{if(f.clima&&f.clima.startsWith(p.textContent))p.classList.add('selected');});
     showToast('✏️ Editando — salve para confirmar','success');
   },100);
 }
