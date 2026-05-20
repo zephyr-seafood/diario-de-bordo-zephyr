@@ -2133,7 +2133,7 @@ function renderHistTaxas(){
         '<div style="display:flex;gap:8px;align-items:center;">'+
           '<span style="font-size:13px;font-weight:700;color:var(--teal);">R$ '+totalRec.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span>'+
           '<span style="font-size:12px;color:var(--gray);">'+taxasFilt.length+' colaborador'+(taxasFilt.length!==1?'es':'')+'</span>'+
-          (!isView?'<button onclick="editarTaxa('+JSON.stringify(String(rec.id))+')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>':'')+
+          (!isView?'<button onclick="editarTaxa('+rec.id+')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>':'')+
         '</div>'+
       '</div>'+
       '<div style="display:flex;flex-wrap:wrap;gap:6px;">'+
@@ -2152,9 +2152,10 @@ function renderHistTaxas(){
 }
 function htGoPage(p){htPage=p;renderHistTaxas();document.getElementById('ht_list').scrollIntoView({behavior:'smooth'});}
 function editarTaxa(recId){
-  const allTaxas=LD('taxas')||[];
-  const rec=allTaxas.find(r=>String(r.id)===String(recId));
-  if(!rec)return showToast('⚠️ Registro não encontrado','error');
+  const allTaxas=LD('taxas')||TAXAS_HISTORICO;
+  const id=String(recId).replace(/['"]/g,'');
+  const rec=allTaxas.find(r=>String(r.id)===id);
+  if(!rec)return showToast('⚠️ Registro não encontrado — id: '+id,'error');
   document.getElementById('taxa_data').value=rec.data;
   ST.taxasRows=rec.taxas.map(tx=>({...tx,id:Date.now()+Math.random()}));
   ST._editTaxaId=rec.id;
