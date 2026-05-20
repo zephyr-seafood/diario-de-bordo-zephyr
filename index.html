@@ -1252,32 +1252,15 @@ function renderDashTaxas(){
   const rankClass=(i)=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
   // If searching a specific colaborador, show monthly breakdown
   const buscaColab=(document.getElementById('rank_busca').value||'').toLowerCase();
-  const showMonthly = buscaColab.length >= 3;
-  
   document.getElementById('dt_ranking').innerHTML=colabList.length?`<div class="ranking-list">${colabList.map(([n,v],i)=>{
     const val=rankMode==='val'?v.total:v.qtd;
     const pct=(val/maxColab*100).toFixed(0);
     const display=rankMode==='val'?'R$ '+v.total.toLocaleString('pt-BR',{minimumFractionDigits:2}):v.qtd+'x';
     // Monthly breakdown when searching specific collaborator
-  const mesBreakdown = showMonthly ? (()=>{
-    const byMes={};
-    rowsForRank.filter(r=>r.colaborador===n).forEach(r=>{
-      const m=r.mes||getMesFromData(r.data);
-      if(m){if(!byMes[m])byMes[m]={qtd:0,total:0};byMes[m].qtd++;byMes[m].total+=r.valor||0;}
-    });
-    const entries=MESES_ORDER.filter(m=>byMes[m]).map(m=>
-      '<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--parchment);color:var(--gray);margin-right:4px;display:inline-block;margin-bottom:3px;">'+
-      m.charAt(0)+m.slice(1).toLowerCase()+': <strong>R$ '+byMes[m].total.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong></span>'
-    );
-    return entries.length ? '<div style="margin-top:5px;flex-wrap:wrap;display:flex;gap:2px;">'+entries.join('')+'</div>' : '';
-  })() : '';
-  return `<div class="ranking-item" style="flex-wrap:wrap;">
+  return `<div class="ranking-item" style="cursor:pointer;" onclick="verDetalheColab('${n.replace(/'/g,"\\'")}')">
     <div class="rank-pos ${rankClass(i)}">${i+1}</div>
-    <div style="flex:1;min-width:120px;">
-      <div class="rank-name" title="${n}">${n}</div>
-      ${mesBreakdown}
-    </div>
-    <div class="rank-bar-wrap" style="flex-basis:100px;"><div class="rank-bar" style="width:${pct}%;background:${SETOR_COLORS[v.setor]||'var(--teal)'}"></div></div>
+    <div class="rank-name" title="${n}">${n}</div>
+    <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${SETOR_COLORS[v.setor]||'var(--teal)'}"></div></div>
     <div class="rank-setor">${v.setor||'—'}</div>
     <div class="rank-val">${display}</div>
   </div>`;
@@ -2182,6 +2165,68 @@ function fmtData(d, opts){
   const dt=parseData(d);
   if(!dt)return String(d||'—');
   return dt.toLocaleDateString('pt-BR', opts||{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+}
+
+// ═══ DETALHE COLABORADOR ═══
+function verDetalheColab(nome){
+  const allTaxas = LD('taxas')||TAXAS_HISTORICO;
+  const byMes={};
+  let totalGeral=0, qtdGeral=0, setor='';
+  allTaxas.forEach(rec=>{
+    (rec.taxas||[]).filter(tx=>tx.colaborador===nome).forEach(tx=>{
+      const m=rec.mes||getMesFromData(rec.data);
+      if(!byMes[m])byMes[m]={qtd:0,total:0,datas:[]};
+      byMes[m].qtd++;
+      byMes[m].total+=tx.valor||0;
+      byMes[m].datas.push({data:rec.data,valor:tx.valor||0,tipo:tx.tipo||'',setor:tx.setor||''});
+      totalGeral+=tx.valor||0;
+      qtdGeral++;
+      if(!setor&&tx.setor)setor=tx.setor;
+    });
+  });
+
+  const mesRows = MESES_ORDER.filter(m=>byMes[m]).map(m=>`
+    <tr>
+      <td style="padding:8px 12px;">${m.charAt(0)+m.slice(1).toLowerCase()}</td>
+      <td style="padding:8px 12px;text-align:center;">${byMes[m].qtd}</td>
+      <td style="padding:8px 12px;text-align:right;font-weight:700;color:var(--teal);">R$ ${byMes[m].total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+      <td style="padding:8px 12px;text-align:right;color:var(--gray);">R$ ${(byMes[m].total/byMes[m].qtd).toFixed(2).replace('.',',')}</td>
+    </tr>`).join('');
+
+  document.getElementById('modal_content').innerHTML = `
+    <div class="modal-header">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;">${nome}</div>
+        <div style="font-size:12px;color:var(--gray);margin-top:4px;">${setor} · ${qtdGeral} taxa${qtdGeral!==1?'s':''} registrada${qtdGeral!==1?'s':''}</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid" style="margin-bottom:20px;">
+        <div class="modal-kpi"><div class="v">R$ ${totalGeral.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div><div class="l">Total Pago</div></div>
+        <div class="modal-kpi"><div class="v">${qtdGeral}</div><div class="l">Qtd Taxas</div></div>
+        <div class="modal-kpi"><div class="v">R$ ${qtdGeral>0?(totalGeral/qtdGeral).toFixed(2).replace('.',','):'—'}</div><div class="l">Média por Taxa</div></div>
+      </div>
+      <div class="modal-section-title">Detalhamento por Mês</div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="background:var(--brand);color:white;">
+            <th style="padding:8px 12px;text-align:left;">Mês</th>
+            <th style="padding:8px 12px;text-align:center;">Qtd</th>
+            <th style="padding:8px 12px;text-align:right;">Total</th>
+            <th style="padding:8px 12px;text-align:right;">Média</th>
+          </tr></thead>
+          <tbody>${mesRows||'<tr><td colspan="4" style="padding:16px;text-align:center;color:var(--gray);">Sem dados</td></tr>'}</tbody>
+          <tfoot><tr style="background:var(--parchment);font-weight:700;">
+            <td style="padding:8px 12px;">Total</td>
+            <td style="padding:8px 12px;text-align:center;">${qtdGeral}</td>
+            <td style="padding:8px 12px;text-align:right;color:var(--teal);">R$ ${totalGeral.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+            <td style="padding:8px 12px;text-align:right;color:var(--gray);">R$ ${qtdGeral>0?(totalGeral/qtdGeral).toFixed(2).replace('.',','):'—'}</td>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>`;
+  document.getElementById('modal_overlay').classList.add('open');
 }
 
 </script>
