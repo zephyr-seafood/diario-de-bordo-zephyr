@@ -879,7 +879,10 @@ function salvarFeedback(){
   if(!document.getElementById('f_gerente').value)return showToast('⚠️ Selecione o responsável','error');
   const fat=parseFloat(document.getElementById('f_faturamento').value)||0;
   const cli=parseInt(document.getElementById('f_clientes').value)||0;
-  const rec={id:ST.editId||Date.now(),data,turno:ST.turno,gerente:document.getElementById('f_gerente').value,clima:ST.clima,faturamento:fat,clientes:cli,ticket:cli>0?fat/cli:0,tempos:{entradas:parseInt(document.getElementById('t_entradas').value)||null,principal:parseInt(document.getElementById('t_principal').value)||null,sushi:parseInt(document.getElementById('t_sushi').value)||null,bar:parseInt(document.getElementById('t_bar').value)||null,sobremesa:parseInt(document.getElementById('t_sobremesa').value)||null},faltas:[...ST.faltasList],reclamacoes:document.getElementById('f_reclamacoes').value,elogios:document.getElementById('f_elogios').value};
+  const rec={id:ST.editId||Date.now(),data,turno:ST.turno,gerente:document.getElementById('f_gerente').value,clima:ST.clima,faturamento:fat,clientes:cli,ticket:cli>0?fat/cli:0,tempos:{entradas:parseInt(document.getElementById('t_entradas').value)||null,principal:parseInt(document.getElementById('t_principal').value)||null,sushi:parseInt(document.getElementById('t_sushi').value)||null,bar:parseInt(document.getElementById('t_bar').value)||null,sobremesa:parseInt(document.getElementById('t_sobremesa').value)||null},faltas:[...ST.faltasList],
+    justificativa:document.getElementById('f_justificativa')?.value||'',
+    responsaveis:{cozinha:document.getElementById('f_resp_cozinha')?.value||'',sushi:document.getElementById('f_resp_sushi')?.value||'',bar:document.getElementById('f_resp_bar')?.value||''},
+    reclamacoes:document.getElementById('f_reclamacoes').value,elogios:document.getElementById('f_elogios').value};
   const fbs=LD('feedbacks')||[];
   if(ST.editId){const idx=fbs.findIndex(f=>f.id===ST.editId);if(idx>=0)fbs[idx]=rec;else fbs.push(rec);}else fbs.push(rec);
   SD('feedbacks',fbs);
