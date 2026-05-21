@@ -2313,14 +2313,20 @@ function renderProdutividade(){
     const resp = f.responsaveis[setor].trim();
     const tempo = parseInt(f.tempos[cfg.tempo]);
     if(!resp||!tempo) return;
-    if(!byResp[resp]) byResp[resp]={qtd:0,totalTempo:0,turnos:[]};
+    if(!byResp[resp]) byResp[resp]={qtd:0,totalTempo:0,totalClientes:0,turnos:[]};
     byResp[resp].qtd++;
     byResp[resp].totalTempo+=tempo;
-    byResp[resp].turnos.push({data:f.data,turno:f.turno,tempo});
+    byResp[resp].totalClientes+=parseInt(f.clientes)||0;
+    byResp[resp].turnos.push({data:f.data,turno:f.turno,tempo,clientes:parseInt(f.clientes)||0});
   });
 
   const respList = Object.entries(byResp)
-    .map(([nome,v])=>({nome, qtd:v.qtd, media:v.totalTempo/v.qtd, turnos:v.turnos}))
+    .map(([nome,v])=>({
+      nome, qtd:v.qtd,
+      media:v.totalTempo/v.qtd,
+      mediaClientes:v.totalClientes/v.qtd,
+      turnos:v.turnos
+    }))
     .sort((a,b)=>a.media-b.media); // menor tempo = melhor = primeiro
 
   if(!respList.length){
@@ -2332,7 +2338,13 @@ function renderProdutividade(){
   const maxMedia = respList[respList.length-1].media;
   const mediaGeral = data.reduce((a,f)=>a+parseInt(f.tempos[cfg.tempo]||0),0)/data.length;
 
-  el.innerHTML = '<div style="margin-bottom:12px;font-size:12px;color:var(--gray);">Média geral do período: <strong>'+mediaGeral.toFixed(1)+' min</strong> · '+data.length+' turno'+(data.length!==1?'s':'')+' com dados</div>'+
+  const mediaClientesGeral = data.reduce((a,f)=>a+(parseInt(f.clientes)||0),0)/data.length;
+  el.innerHTML = '<div style="background:var(--parchment);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;">'+
+    '<span style="font-size:12px;color:var(--gray);">⏱ Média geral: <strong>'+mediaGeral.toFixed(1)+' min</strong></span>'+
+    '<span style="font-size:12px;color:var(--gray);">👥 Média de clientes: <strong>'+mediaClientesGeral.toFixed(0)+' por turno</strong></span>'+
+    '<span style="font-size:12px;color:var(--gray);">📋 <strong>'+data.length+'</strong> turno'+(data.length!==1?'s':'')+' com dados</span>'+
+    '<span style="font-size:11px;color:var(--gray-light);font-style:italic;">💡 O volume de clientes pode influenciar o tempo médio</span>'+
+  '</div>'+
   '<div class="bar-chart">'+
   respList.map((r,i)=>{
     const pct = maxMedia>0?(r.media/maxMedia*100).toFixed(0):100;
@@ -2341,18 +2353,23 @@ function renderProdutividade(){
     const badge = i===0&&respList.length>1?'<span style="font-size:10px;background:#e8f5e9;color:var(--green);padding:2px 8px;border-radius:10px;font-weight:700;margin-left:6px;">🏆 Melhor</span>':
                   i===respList.length-1&&respList.length>1?'<span style="font-size:10px;background:#fff5f5;color:var(--coral);padding:2px 8px;border-radius:10px;font-weight:700;margin-left:6px;">⚠️ Atenção</span>':'';
     const diff = r.media - mediaGeral;
-    const diffStr = diff===0?'':diff<0?'<span style="color:var(--green);font-size:11px;"> ('+diff.toFixed(1)+'min)</span>':'<span style="color:var(--coral);font-size:11px;"> (+'+diff.toFixed(1)+'min)</span>';
-    return '<div style="margin-bottom:14px;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">'+
-        '<div style="font-size:13px;font-weight:600;">'+r.nome+badge+'</div>'+
+    const diffStr = diff===0?'':diff<0?'<span style="color:var(--green);font-size:11px;"> ('+diff.toFixed(1)+'min vs média)</span>':'<span style="color:var(--coral);font-size:11px;"> (+'+diff.toFixed(1)+'min vs média)</span>';
+    const clientesInfo = r.mediaClientes>0?
+      '<span style="font-size:11px;color:var(--gray);background:var(--sand);padding:2px 8px;border-radius:10px;margin-left:6px;">👥 '+r.mediaClientes.toFixed(0)+' clientes/turno em média</span>':'';
+    return '<div style="margin-bottom:16px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">'+
+        '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">'+
+          '<span style="font-size:13px;font-weight:600;">'+r.nome+'</span>'+
+          badge+clientesInfo+
+        '</div>'+
         '<div style="font-size:12px;color:var(--gray);">'+r.qtd+' turno'+(r.qtd!==1?'s':'')+'</div>'+
       '</div>'+
       '<div class="bar-track" style="height:28px;">'+
         '<div class="bar-fill" style="width:'+pct+'%;background:'+barColor+';">'+
-          '<span class="bar-val">'+r.media.toFixed(1)+' min'+' </span>'+
+          '<span class="bar-val">'+r.media.toFixed(1)+' min</span>'+
         '</div>'+
-        '<span style="font-size:11px;color:var(--gray);padding-left:8px;">'+diffStr+'</span>'+
       '</div>'+
+      '<div style="margin-top:3px;">'+diffStr+'</div>'+
     '</div>';
   }).join('')+
   '</div>';
