@@ -1203,9 +1203,11 @@ function renderDashTaxas(){
   const allTaxas=LD('taxas')||[];
   const byMes={};
   allTaxas.forEach(rec=>{
-    const m=rec.mes;
+    const m=rec.mes||getMesFromData(rec.data);
+    if(!m)return;
     if(!byMes[m])byMes[m]={qtd:0,total:0};
-    byMes[m].qtd+=rec.taxas.length;byMes[m].total+=rec.total;
+    byMes[m].qtd+=(rec.taxas||[]).length;
+    byMes[m].total+=rec.total||(rec.taxas||[]).reduce((a,t)=>a+(t.valor||0),0);
   });
   const mesOrdered=MESES_ORDER.filter(m=>byMes[m]);
   const maxMes=Math.max(...mesOrdered.map(m=>byMes[m].total),1);
@@ -1248,7 +1250,10 @@ function renderDashTaxas(){
   const diasColors=['var(--coral)','var(--teal)','var(--teal)','var(--teal)','var(--teal)','var(--gold)','var(--coral)'];
   const byDia=Array(7).fill(null).map(()=>({qtd:0,total:0}));
   (LD('taxas')||TAXAS_HISTORICO).forEach(rec=>{
-    const dow=new Date(rec.data+'T12:00:00').getDay();
+    if(!rec.data)return;
+    const dt=parseData(rec.data);
+    if(!dt)return;
+    const dow=dt.getDay();
     (rec.taxas||[]).forEach(tx=>{byDia[dow].qtd++;byDia[dow].total+=tx.valor||0;});
   });
   const maxDia=Math.max(...byDia.map(d=>d.qtd),1);
