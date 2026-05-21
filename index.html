@@ -1605,6 +1605,7 @@ function confirmarNovoItem(){
     const extras=LD('cardapio_extras')||[];
     extras.push({nome,setor:_niSetor});
     SD('cardapio_extras',extras);
+    api('salvarItemCardapio',{nome,setor:_niSetor});
   }
   addFalta(nome,_niSetor);
   document.getElementById('modal_novoitem').classList.remove('open');
@@ -1877,7 +1878,10 @@ function salvarEvento(){
   if(ST_ev.editId){const idx=evs.findIndex(e=>e.id===ST_ev.editId);if(idx>=0)evs[idx]=rec;else evs.push(rec);}
   else evs.push(rec);
   SD('eventos',evs);
-  showToast('✓ Evento salvo!','success');
+  showToast('💾 Salvando evento...','success');
+  api('salvarEvento', rec).then(r=>{
+    showToast(r.ok?'✓ Evento salvo!':'⚠️ Salvo local, erro no Sheets','success');
+  });
   ST_ev={turno:null,editId:null};
   ['ev_data','ev_faturamento','ev_clientes','ev_ticket','ev_obs','ev_preco_menu'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('ev_tipo').value='';
@@ -1988,6 +1992,7 @@ function renderEventos(){
 function deletarEvento(id){
   if(!confirm('Excluir este evento?'))return;
   let evs=LD('eventos')||[];evs=evs.filter(e=>e.id!==id);SD('eventos',evs);
+  api('deletarEvento',{id});
   renderEventos();showToast('🗑 Excluído','success');
 }
 // ═══ SINCRONIZAR COM GOOGLE SHEETS ═══
@@ -2045,6 +2050,24 @@ async function sincronizarSheets(){
       SD('colab_extras',merged);
       merged.forEach(n=>{if(!COLABORADORES.includes(n))COLABORADORES.push(n);});
       COLABORADORES.sort();
+    }
+    if(r.data.eventos && r.data.eventos.length){
+      const localEvs=LD('eventos')||[];
+      const sheetsIds=new Set(r.data.eventos.map(e=>String(e.id)));
+      const localOnly=localEvs.filter(e=>!sheetsIds.has(String(e.id)));
+      SD('eventos',[...r.data.eventos,...localOnly]);
+      renderEventos();
+    }
+    if(r.data.cardapio && r.data.cardapio.length){
+      const extrasSheets=r.data.cardapio;
+      const existing=LD('cardapio_extras')||[];
+      const existingNomes=new Set(existing.map(i=>i.nome.toLowerCase()));
+      const novos=extrasSheets.filter(i=>!existingNomes.has(i.nome.toLowerCase()));
+      if(novos.length){
+        const merged=[...existing,...novos];
+        SD('cardapio_extras',merged);
+        novos.forEach(i=>{if(!CARDAPIO.find(c=>c.nome.toLowerCase()===i.nome.toLowerCase()))CARDAPIO.push(i);});
+      }
     }
     showToast('✓ Sincronizado com Google Sheets!','success');
     const activeTab=document.querySelector('.tab.active')?.dataset?.tab;
