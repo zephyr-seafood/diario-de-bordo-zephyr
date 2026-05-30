@@ -1211,15 +1211,14 @@ function renderDashTaxas(){
   document.getElementById('dt_k5s').textContent=diasComRegistro+' dia'+(diasComRegistro!==1?'s':'')+' com registro';
   document.getElementById('dt_k5b').textContent='R$ '+custoPorDiaPeriodo.toFixed(2).replace('.',',');
 
-  // Gráfico mensal em barras horizontais
-  const allTaxas=LD('taxas')||[];
+  // Gráfico mensal em barras horizontais — usa dados filtrados
   const byMes={};
-  allTaxas.forEach(rec=>{
-    const m=rec.mes||getMesFromData(rec.data);
+  rows.forEach(r=>{
+    const m=r.mes||getMesFromData(r.data);
     if(!m)return;
     if(!byMes[m])byMes[m]={qtd:0,total:0};
-    byMes[m].qtd+=(rec.taxas||[]).length;
-    byMes[m].total+=rec.total||(rec.taxas||[]).reduce((a,t)=>a+(t.valor||0),0);
+    byMes[m].qtd++;
+    byMes[m].total+=r.valor||0;
   });
   const mesOrdered=MESES_ORDER.filter(m=>byMes[m]);
   const maxMes=Math.max(...mesOrdered.map(m=>byMes[m].total),1);
