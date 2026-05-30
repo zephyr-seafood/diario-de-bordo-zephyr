@@ -236,7 +236,6 @@ body.view-mode .form-footer{display:none;}
   <div class="tab" data-tab="taxas" onclick="switchTab('taxas')">💰 Taxas</div>
   <div class="tab" data-tab="hist-taxas" onclick="switchTab('hist-taxas')">🗂 Hist. Taxas</div>
   <div class="tab" data-tab="eventos" onclick="switchTab('eventos')">🎉 Eventos</div>
-  <div class="tab" data-tab="escala" onclick="switchTab('escala')">📅 Escala FDS</div>
 </div>
 <main>
 
@@ -365,7 +364,10 @@ body.view-mode .form-footer{display:none;}
     <div><div style="color:var(--gold-light);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Total a Pagar</div><div id="taxa_total" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--white);">R$ 0,00</div></div>
     <div style="text-align:right;"><div style="color:var(--gray-light);font-size:10px;margin-bottom:4px;">Colaboradores</div><div id="taxa_count" style="font-size:24px;font-weight:700;color:var(--white);">0</div></div>
   </div>
-  <div class="form-footer"><button class="btn-salvar" onclick="salvarTaxas()">✓ Salvar Taxas</button></div>
+  <div class="form-footer" style="justify-content:space-between;">
+    <button id="btn_excluir_taxa" onclick="excluirTaxaEmEdicao()" style="display:none;background:none;border:1.5px solid var(--coral);color:var(--coral);padding:10px 20px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">🗑 Excluir este registro</button>
+    <button class="btn-salvar" onclick="salvarTaxas()">✓ Salvar Taxas</button>
+  </div>
 </div>
 
 <!-- ════ HISTÓRICO TAXAS ════ -->
@@ -648,94 +650,6 @@ body.view-mode .form-footer{display:none;}
   </div>
 </div>
 
-<!-- ════ ABA ESCALA FDS ════ -->
-<div class="page" id="page-escala">
-  <div class="page-header">
-    <div class="section-title">Escala FDS</div>
-    <div class="section-sub">Apoio à decisão + registro real da escala — Salão</div>
-  </div>
-
-  <!-- STEP 1: Seleção do FDS -->
-  <div class="card">
-    <div class="card-title">📅 1. Selecione o Fim de Semana</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Sexta-feira</label>
-        <input type="date" id="esc_sexta" onchange="renderEscala()">
-      </div>
-      <div class="form-group">
-        <label>Clima previsto — Sexta</label>
-        <select id="esc_clima_sex" onchange="renderEscala()">
-          <option value="">Selecione...</option>
-          <option>☀️ Ensolarado</option><option>⛅ Nublado</option>
-          <option>🌧️ Chuvoso</option><option>⛈️ Tempestade</option><option>🥶 Frio</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Clima previsto — Sábado</label>
-        <select id="esc_clima_sab" onchange="renderEscala()">
-          <option value="">Selecione...</option>
-          <option>☀️ Ensolarado</option><option>⛅ Nublado</option>
-          <option>🌧️ Chuvoso</option><option>⛈️ Tempestade</option><option>🥶 Frio</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Clima previsto — Domingo</label>
-        <select id="esc_clima_dom" onchange="renderEscala()">
-          <option value="">Selecione...</option>
-          <option>☀️ Ensolarado</option><option>⛅ Nublado</option>
-          <option>🌧️ Chuvoso</option><option>⛈️ Tempestade</option><option>🥶 Frio</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Inclui feriado?</label>
-        <div class="pill-group" id="esc_feriado_pills">
-          <div class="pill" onclick="selectEscPill('esc_feriado','Sim',this)">✅ Sim</div>
-          <div class="pill" onclick="selectEscPill('esc_feriado','Não',this)">❌ Não</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 2: Sugestão baseada em histórico -->
-  <div id="esc_resultado" style="display:none;">
-    <div class="card">
-      <div class="card-title">📊 2. Histórico de Dias Similares</div>
-      <div id="esc_dias"></div>
-    </div>
-
-    <!-- STEP 3: Registro da escala real -->
-    <div class="card">
-      <div class="card-title">✏️ 3. Registrar Escala Real</div>
-      <p style="font-size:13px;color:var(--gray);margin-bottom:16px;">Preencha após definir a escala. Esse registro alimenta as sugestões futuras.</p>
-      <div id="esc_turnos_form"></div>
-    </div>
-
-    <!-- Custo estimado -->
-    <div class="card" style="background:var(--brand);border-color:var(--brand);">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-        <div>
-          <div style="color:var(--gold-light);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Custo Estimado com Extras</div>
-          <div id="esc_custo_total" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--white);">R$ 0,00</div>
-          <div id="esc_custo_sub" style="font-size:12px;color:var(--gray-light);margin-top:2px;"></div>
-        </div>
-        <button onclick="gerarTextoEscala()" style="background:var(--gold);color:var(--white);border:none;padding:12px 18px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">
-          📲 Gerar WhatsApp
-        </button>
-      </div>
-    </div>
-    <div class="form-footer">
-      <button class="btn-salvar" onclick="salvarEscala()">✓ Salvar Escala</button>
-    </div>
-  </div>
-
-  <!-- Histórico -->
-  <div class="card" style="margin-top:20px;">
-    <div class="card-title">📋 Escalas Registradas</div>
-    <div id="esc_historico"><div class="empty-state"><div class="icon">📅</div><p>Nenhuma escala registrada ainda</p></div></div>
-  </div>
-</div>
-
 </main>
 
 <!-- MODAL NOVO COLABORADOR -->
@@ -886,7 +800,6 @@ function switchTab(t){
   if(t==='historico')renderHistorico();
   if(t==='hist-taxas'){renderHistTaxas();setTimeout(checkBtnMigrar,100);}
   if(t==='eventos')renderEventos();
-  if(t==='escala'){renderEscala();renderEscHistorico();}
   if(t==='dash-taxas')renderDashTaxas();
   if(t==='dash-feedback'){renderDashFeedback();renderProdutividade();}
 }
@@ -1090,7 +1003,7 @@ function salvarTaxas(){
   api('salvarTaxas', rec).then(r=>{
     showToast(r.ok?(ST._editTaxaId?'✓ Taxas atualizadas!':'✓ Taxas salvas!'):'⚠️ Salvo local, erro no Sheets','success');
   });
-  ST.taxasRows=[];ST._editTaxaId=null;renderTaxaRows();
+  ST.taxasRows=[];ST._editTaxaId=null;renderTaxaRows();const _be=document.getElementById('btn_excluir_taxa');if(_be)_be.style.display='none';
 }
 
 // Histórico
@@ -1233,7 +1146,8 @@ function getTaxasFiltered(){
 }
 function limparFiltrosTaxas(){
   document.getElementById('dt_mes').value='';
-  document.getElementById('dt_data').value='';
+  const de=document.getElementById('dt_de');if(de)de.value='';
+  const ate=document.getElementById('dt_ate');if(ate)ate.value='';
   document.getElementById('dt_setor').value='';
   document.getElementById('dt_tipo').value='';
   renderDashTaxas();
@@ -2254,7 +2168,7 @@ function renderHistTaxas(){
         '<div style="display:flex;gap:8px;align-items:center;">'+
           '<span style="font-size:13px;font-weight:700;color:var(--teal);">R$ '+totalRec.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span>'+
           '<span style="font-size:12px;color:var(--gray);">'+taxasFilt.length+' colaborador'+(taxasFilt.length!==1?'es':'')+'</span>'+
-          (!isView?'<button onclick="editarTaxa('+rec.id+')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button> <button onclick="excluirTaxa('+rec.id+')" style="background:var(--coral);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">🗑 Excluir</button>':'')+
+          (!isView?'<button onclick="editarTaxa('+rec.id+')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>':'')+
         '</div>'+
       '</div>'+
       '<div style="display:flex;flex-wrap:wrap;gap:6px;">'+
@@ -2281,6 +2195,8 @@ function editarTaxa(recId){
   ST.taxasRows=rec.taxas.map(tx=>({...tx,id:Date.now()+Math.random()}));
   ST._editTaxaId=rec.id;
   switchTab('taxas');renderTaxaRows();
+  const btnExcluir=document.getElementById('btn_excluir_taxa');
+  if(btnExcluir)btnExcluir.style.display='block';
   showToast('✏️ Editando taxas de '+fmtData(rec.data,{day:'2-digit',month:'short'}),'success');
 }
 function checkBtnMigrar(){
@@ -2468,265 +2384,6 @@ function renderProdutividade(){
     '</div>';
   }).join('')+
   '</div>';
-}
-
-// ═══ ESCALA FDS ═══
-const ESC_EFETIVOS = { garcons: 6, cumins: 4 };
-let ST_esc = { feriado: null };
-const DIAS_FDS = [
-  {key:'sex', label:'Sexta-feira',  icon:'🍷', diaSem:5, turnos:['Almoço','Jantar']},
-  {key:'sab', label:'Sábado',       icon:'🌟', diaSem:6, turnos:['Almoço','Jantar']},
-  {key:'dom', label:'Domingo',      icon:'☀️', diaSem:0, turnos:['Almoço']},
-];
-
-function selectEscPill(field,val,el){
-  ST_esc[field]=val;
-  el.parentElement.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected'));
-  el.classList.add('selected');
-  renderEscala();
-}
-
-function getHistoricoSimilar(diaSemana, clima){
-  const fbs=LD('feedbacks')||[];
-  const climaBase=clima?clima.split(' ')[0]:null;
-  return fbs.filter(f=>{
-    const d=parseData(f.data);
-    if(!d||d.getDay()!==diaSemana)return false;
-    if(climaBase&&f.clima&&f.clima.split(' ')[0]!==climaBase)return false;
-    return true;
-  });
-}
-
-function getExtrasHistoricos(diaSemana, clima){
-  const allTaxas=LD('taxas')||TAXAS_HISTORICO;
-  const fbs=LD('feedbacks')||[];
-  const climaBase=clima?clima.split(' ')[0]:null;
-  const datasSimilares=new Set(
-    fbs.filter(f=>{
-      const d=parseData(f.data);
-      if(!d||d.getDay()!==diaSemana)return false;
-      if(climaBase&&f.clima&&f.clima.split(' ')[0]!==climaBase)return false;
-      return true;
-    }).map(f=>String(f.data).substring(0,10))
-  );
-  let totalExtras=0,totalCusto=0,diasContados=0;
-  allTaxas.forEach(rec=>{
-    const data=String(rec.data).substring(0,10);
-    if(!datasSimilares.has(data))return;
-    const extrasSetor=(rec.taxas||[]).filter(tx=>tx.setor==='Salão');
-    if(extrasSetor.length>0){
-      totalExtras+=extrasSetor.length;
-      totalCusto+=extrasSetor.reduce((a,t)=>a+(t.valor||0),0);
-      diasContados++;
-    }
-  });
-  // Also get from saved escalas
-  const escalas=LD('escalas')||[];
-  escalas.forEach(e=>{
-    if(!e.turnosReais)return;
-    Object.values(e.turnosReais).forEach(t=>{
-      const d=parseData(t.data);
-      if(!d||d.getDay()!==diaSemana)return;
-      if(climaBase&&t.clima&&t.clima.split(' ')[0]!==climaBase)return;
-      if(t.extras>0){
-        totalExtras+=parseInt(t.extras)||0;
-        diasContados++;
-      }
-    });
-  });
-  return {
-    mediaExtras:diasContados>0?(totalExtras/diasContados):null,
-    mediaCusto:diasContados>0?(totalCusto/diasContados):null,
-    diasContados
-  };
-}
-
-function renderEscala(){
-  const sexta=document.getElementById('esc_sexta').value;
-  if(!sexta){document.getElementById('esc_resultado').style.display='none';return;}
-  const dtSexta=parseData(sexta);
-  if(!dtSexta)return;
-
-  const climas={sex:document.getElementById('esc_clima_sex').value,
-                sab:document.getElementById('esc_clima_sab').value,
-                dom:document.getElementById('esc_clima_dom').value};
-  const feriado=ST_esc.feriado==='Sim';
-
-  let custoTotal=0, totalExtrasGeral=0;
-  let diasHTML='', turnosFormHTML='';
-
-  DIAS_FDS.forEach((dia,idx)=>{
-    const dt=new Date(dtSexta.getTime()+idx*864e5);
-    const dtStr=dt.toISOString().split('T')[0];
-    const clima=climas[dia.key];
-    const hist=getHistoricoSimilar(dia.diaSem, clima);
-    const extras=getExtrasHistoricos(dia.diaSem, clima);
-    const mediaClientes=hist.length>0?(hist.reduce((a,f)=>a+(f.clientes||0),0)/hist.length).toFixed(0):null;
-    const extrasNum=extras.mediaExtras?Math.ceil(extras.mediaExtras):0;
-    const custoDia=extras.mediaCusto?extras.mediaCusto:0;
-    custoTotal+=custoDia;
-    totalExtrasGeral+=extrasNum;
-    const totalEquipe=ESC_EFETIVOS.garcons+ESC_EFETIVOS.cumins+extrasNum;
-
-    // Historico card
-    diasHTML+='<div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'+
-        '<div><span style="font-size:18px;">'+dia.icon+'</span> <strong>'+dia.label+'</strong>'+
-        (feriado?' <span style="background:var(--gold-pale);color:var(--gold);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Feriado</span>':'')+
-        (clima?' <span style="font-size:12px;color:var(--gray);">'+clima+'</span>':'')+
-        '</div>'+
-        '<span style="font-size:11px;color:var(--gray-light);">'+hist.length+' dia'+(hist.length!==1?'s':'')+' similares no histórico</span>'+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;">'+
-        (mediaClientes?'<div style="background:var(--parchment);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Clientes/dia</div><div style="font-size:20px;font-weight:700;color:var(--teal);">'+mediaClientes+'</div></div>':'') +
-        '<div style="background:var(--parchment);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Fixos</div><div style="font-size:20px;font-weight:700;color:var(--teal);">'+(ESC_EFETIVOS.garcons+ESC_EFETIVOS.cumins)+'</div></div>'+
-        '<div style="background:'+(extrasNum>0?'var(--gold-pale)':'var(--parchment)')+';border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Extras sugeridos</div><div style="font-size:20px;font-weight:700;color:'+(extrasNum>0?'var(--gold)':'var(--gray-light)')+'">'+(extras.mediaExtras!==null?extrasNum:'—')+'</div></div>'+
-        '<div style="background:var(--brand);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.5px;">Total equipe</div><div style="font-size:20px;font-weight:700;color:white;">'+totalEquipe+'</div></div>'+
-      '</div>'+
-    '</div>';
-
-    // Escala real form — per turno
-    dia.turnos.forEach(turno=>{
-      const tid=dia.key+'_'+turno.toLowerCase().replace('ç','c');
-      turnosFormHTML+='<div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;">'+
-        '<div style="font-weight:600;font-size:14px;margin-bottom:12px;">'+dia.icon+' '+dia.label+' — '+(turno==='Almoço'?'☀️':'🌙')+' '+turno+'</div>'+
-        '<input type="hidden" id="'+tid+'_data" value="'+dtStr+'">'+
-        '<input type="hidden" id="'+tid+'_clima" value="'+( clima||'')+'">'+
-        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:12px;">'+
-          '<div class="form-group"><label>Garçons no turno</label><input type="number" id="'+tid+'_garc" min="0" max="10" placeholder="0" style="text-align:center;font-size:18px;font-weight:700;"></div>'+
-          '<div class="form-group"><label>Cumins no turno</label><input type="number" id="'+tid+'_cum" min="0" max="6" placeholder="0" style="text-align:center;font-size:18px;font-weight:700;"></div>'+
-          '<div class="form-group"><label>Dobraram turno</label><input type="number" id="'+tid+'_dobra" min="0" max="10" placeholder="0" style="text-align:center;font-size:18px;font-weight:700;"></div>'+
-          '<div class="form-group"><label>Folgas no turno</label><input type="number" id="'+tid+'_folga" min="0" max="10" placeholder="0" style="text-align:center;font-size:18px;font-weight:700;"></div>'+
-          '<div class="form-group"><label>Extras de fora</label><input type="number" id="'+tid+'_extras" min="0" max="10" placeholder="0" style="text-align:center;font-size:18px;font-weight:700;"></div>'+
-          '<div class="form-group"><label>Tipo de extra</label><select id="'+tid+'_tipo_extra"><option value="">—</option><option>Substituto</option><option>Reforço</option><option>Os dois</option></select></div>'+
-        '</div>'+
-        '<div class="form-group"><label>Avaliação da escala</label>'+
-          '<div class="pill-group" id="'+tid+'_aval_pills">'+
-            '<div class="pill" onclick="selectAvalPill(\''+tid+'\',\'✅ Suficiente\',this)" style="border-color:var(--green);color:var(--green);">✅ Suficiente</div>'+
-            '<div class="pill" onclick="selectAvalPill(\''+tid+'\',\'⚠️ Faltou gente\',this)" style="border-color:var(--coral);color:var(--coral);">⚠️ Faltou gente</div>'+
-            '<div class="pill" onclick="selectAvalPill(\''+tid+'\',\'💤 Sobrou gente\',this)" style="border-color:var(--gray);color:var(--gray);">💤 Sobrou gente</div>'+
-          '</div>'+
-        '</div>'+
-      '</div>';
-    });
-  });
-
-  document.getElementById('esc_dias').innerHTML=diasHTML;
-  document.getElementById('esc_turnos_form').innerHTML=turnosFormHTML;
-  document.getElementById('esc_custo_total').textContent='R$ '+custoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2});
-  document.getElementById('esc_custo_sub').textContent=totalExtrasGeral+' extras sugeridos no FDS';
-  document.getElementById('esc_resultado').style.display='block';
-}
-
-function selectAvalPill(tid,val,el){
-  ST_esc['aval_'+tid]=val;
-  el.parentElement.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
-function salvarEscala(){
-  const sexta=document.getElementById('esc_sexta').value;
-  if(!sexta)return showToast('⚠️ Selecione a sexta-feira','error');
-
-  const turnosReais={};
-  DIAS_FDS.forEach((dia,idx)=>{
-    dia.turnos.forEach(turno=>{
-      const tid=dia.key+'_'+turno.toLowerCase().replace('ç','c');
-      const el=id=>document.getElementById(tid+'_'+id);
-      turnosReais[tid]={
-        dia:dia.label, turno,
-        data:el('data')?.value||'',
-        clima:el('clima')?.value||'',
-        garcons:parseInt(el('garc')?.value)||0,
-        cumins:parseInt(el('cum')?.value)||0,
-        dobraram:parseInt(el('dobra')?.value)||0,
-        folgas:parseInt(el('folga')?.value)||0,
-        extras:parseInt(el('extras')?.value)||0,
-        tipoExtra:el('tipo_extra')?.value||'',
-        avaliacao:ST_esc['aval_'+tid]||'',
-      };
-    });
-  });
-
-  const rec={
-    id:Date.now(), sexta,
-    climaSex:document.getElementById('esc_clima_sex').value,
-    climaSab:document.getElementById('esc_clima_sab').value,
-    climaDom:document.getElementById('esc_clima_dom').value,
-    feriado:ST_esc.feriado||'Não',
-    turnosReais,
-    criadoEm:new Date().toLocaleString('pt-BR')
-  };
-
-  const escalas=LD('escalas')||[];
-  escalas.unshift(rec);
-  SD('escalas',escalas.slice(0,30));
-  showToast('✓ Escala salva!','success');
-  renderEscHistorico();
-}
-
-function gerarTextoEscala(){
-  const sexta=document.getElementById('esc_sexta').value;
-  if(!sexta)return;
-  const dtSexta=parseData(sexta);
-  const climas={sex:document.getElementById('esc_clima_sex').value,sab:document.getElementById('esc_clima_sab').value,dom:document.getElementById('esc_clima_dom').value};
-  const feriado=ST_esc.feriado==='Sim';
-
-  let texto='📅 *ESCALA FDS — SALÃO*\n';
-  texto+='_Sugestão baseada no histórico de operação_\n\n';
-
-  DIAS_FDS.forEach((dia,idx)=>{
-    const dt=new Date(dtSexta.getTime()+idx*864e5);
-    const clima=climas[dia.key];
-    const extras=getExtrasHistoricos(dia.diaSem,clima);
-    const extrasNum=extras.mediaExtras?Math.ceil(extras.mediaExtras):0;
-    const total=ESC_EFETIVOS.garcons+ESC_EFETIVOS.cumins+extrasNum;
-    texto+='*'+dia.icon+' '+dia.label.toUpperCase()+'*'+(feriado?' (Feriado)':'')+'\n';
-    texto+=fmtData(dt.toISOString().split('T')[0],{day:'2-digit',month:'long',year:'numeric'})+'\n';
-    if(clima)texto+=clima+'\n';
-    texto+='👥 Equipe Salão sugerida: *'+total+' pessoas*\n';
-    texto+='   • '+ESC_EFETIVOS.garcons+' garçons + '+ESC_EFETIVOS.cumins+' cumins (efetivos)\n';
-    if(extrasNum>0)texto+='   • '+extrasNum+' extra'+(extrasNum!==1?'s':'')+' sugerido'+(extrasNum!==1?'s':'')+'\n';
-    dia.turnos.forEach(t=>{texto+='   '+( t==='Almoço'?'☀️':'🌙')+' '+t+'\n';});
-    texto+='\n';
-  });
-
-  const custo=document.getElementById('esc_custo_total').textContent;
-  texto+='💰 Custo estimado extras: *'+custo+'*\n';
-  texto+='\n_Gerado pelo Diário de Bordo Zephyr_';
-
-  navigator.clipboard.writeText(texto).then(()=>{
-    showToast('✓ Texto copiado! Cole no WhatsApp.','success');
-  }).catch(()=>{prompt('Copie o texto:',texto);});
-}
-
-function renderEscHistorico(){
-  const escalas=LD('escalas')||[];
-  const el=document.getElementById('esc_historico');
-  if(!escalas.length){el.innerHTML='<div class="empty-state"><div class="icon">📅</div><p>Nenhuma escala registrada ainda</p></div>';return;}
-  el.innerHTML=escalas.map(e=>{
-    const turnos=Object.values(e.turnosReais||{});
-    const totalExtras=turnos.reduce((a,t)=>a+(t.extras||0),0);
-    const avaliacoes=turnos.filter(t=>t.avaliacao).map(t=>t.avaliacao);
-    const temProblema=avaliacoes.some(a=>a.includes('Faltou'));
-    return '<div class="hist-item" style="cursor:default;">'+
-      '<div class="hist-header">'+
-        '<div>'+
-          '<div class="hist-date">FDS de '+fmtData(e.sexta,{day:'2-digit',month:'long',year:'numeric'})+'</div>'+
-          '<div style="font-size:11px;color:var(--gray);margin-top:2px;">'+
-            (e.climaSex?e.climaSex+' Sex · ':'')+
-            (e.climaSab?e.climaSab+' Sáb · ':'')+
-            (e.climaDom?e.climaDom+' Dom':'')+ 
-            (e.feriado==='Sim'?' · Feriado':'')+'</div>'+
-        '</div>'+
-        '<div style="display:flex;gap:8px;align-items:center;">'+
-          (totalExtras>0?'<span style="background:var(--gold-pale);color:var(--gold);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;">'+totalExtras+' extras</span>':'')+
-          (temProblema?'<span style="background:#fff5f5;color:var(--coral);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;">⚠️ Faltou gente</span>':
-            avaliacoes.length?'<span style="background:#f0faf0;color:var(--green);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;">✅ OK</span>':'')+
-        '</div>'+
-      '</div>'+
-    '</div>';
-  }).join('');
 }
 
 // ═══ MIGRAÇÃO INICIAL DE TAXAS ═══
@@ -3096,7 +2753,7 @@ function renderHistTaxas(){
         '<div style="display:flex;gap:8px;align-items:center;">'+
           '<span style="font-size:13px;font-weight:700;color:var(--teal);">R$ '+totalRec.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span>'+
           '<span style="font-size:12px;color:var(--gray);">'+taxasFilt.length+' colaborador'+(taxasFilt.length!==1?'es':'')+'</span>'+
-          (!isView?'<button onclick="editarTaxa('+rec.id+')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button> <button onclick="excluirTaxa('+rec.id+')" style="background:var(--coral);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">🗑 Excluir</button>':'')+
+          (!isView?'<button onclick="editarTaxa('+rec.id+')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>':'')+
         '</div>'+
       '</div>'+
       '<div style="display:flex;flex-wrap:wrap;gap:6px;">'+
@@ -3123,6 +2780,8 @@ function editarTaxa(recId){
   ST.taxasRows=rec.taxas.map(tx=>({...tx,id:Date.now()+Math.random()}));
   ST._editTaxaId=rec.id;
   switchTab('taxas');renderTaxaRows();
+  const btnExcluir=document.getElementById('btn_excluir_taxa');
+  if(btnExcluir)btnExcluir.style.display='block';
   showToast('✏️ Editando taxas de '+fmtData(rec.data,{day:'2-digit',month:'short'}),'success');
 }
 function checkBtnMigrar(){
@@ -3310,6 +2969,21 @@ function renderProdutividade(){
 
 // ═══ ESCALA FDS ═══
 
+
+function excluirTaxaEmEdicao(){
+  if(!ST._editTaxaId)return;
+  if(!confirm('Excluir este registro de taxa? Esta ação não pode ser desfeita.'))return;
+  const id=String(ST._editTaxaId);
+  let allTaxas=LD('taxas')||[];
+  allTaxas=allTaxas.filter(r=>String(r.id)!==id);
+  SD('taxas',allTaxas);
+  api('deletarTaxa',{id});
+  ST.taxasRows=[];ST._editTaxaId=null;
+  const btn=document.getElementById('btn_excluir_taxa');if(btn)btn.style.display='none';
+  renderTaxaRows();
+  showToast('🗑 Registro excluído!','success');
+  switchTab('hist-taxas');
+}
 
 // ═══ EXCLUIR TAXA ═══
 function excluirTaxa(recId){
