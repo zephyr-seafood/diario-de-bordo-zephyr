@@ -398,13 +398,15 @@ body.view-mode .form-footer{display:none;}
 
   <div class="filtro-row">
     <label>Mês:</label>
-    <select id="dt_mes" onchange="renderDashTaxas()"><option value="">Todos</option><option>JANEIRO</option><option>FEVEREIRO</option><option>MARÇO</option><option>ABRIL</option><option>MAIO</option></select>
+    <select id="dt_mes" onchange="renderDashTaxas()"><option value="">Todos</option><option>JANEIRO</option><option>FEVEREIRO</option><option>MARÇO</option><option>ABRIL</option><option>MAIO</option><option>JUNHO</option><option>JULHO</option><option>AGOSTO</option><option>SETEMBRO</option><option>OUTUBRO</option><option>NOVEMBRO</option><option>DEZEMBRO</option></select>
     <div class="filtro-sep"></div>
-    <label>Data:</label>
-    <input type="date" id="dt_data" onchange="renderDashTaxas()" style="max-width:160px;">
+    <label>De:</label>
+    <input type="date" id="dt_de" onchange="renderDashTaxas()" style="max-width:150px;">
+    <label>Até:</label>
+    <input type="date" id="dt_ate" onchange="renderDashTaxas()" style="max-width:150px;">
     <div class="filtro-sep"></div>
     <label>Setor:</label>
-    <select id="dt_setor" onchange="renderDashTaxas()"><option value="">Todos</option><option>Salão</option><option>Cozinha</option><option>Bar</option><option>Sushi</option><option>Serviços Gerais</option><option>Op. Caixa</option></select>
+    <select id="dt_setor" onchange="renderDashTaxas()"><option value="">Todos</option><option>Salão</option><option>Cozinha</option><option>Bar</option><option>Sushi</option><option>Serviços Gerais</option><option>Op. Caixa</option><option>Gerência</option></select>
     <div class="filtro-sep"></div>
     <label>Tipo:</label>
     <select id="dt_tipo" onchange="renderDashTaxas()"><option value="">Todos</option><option>Taxa Normal</option><option>Folga Vendida</option></select>
@@ -1128,14 +1130,17 @@ function getTaxasFiltered(){
   const mes=document.getElementById('dt_mes').value;
   const setor=document.getElementById('dt_setor').value;
   const tipo=document.getElementById('dt_tipo').value;
-  const data=document.getElementById('dt_data')?document.getElementById('dt_data').value:'';
+  const de=document.getElementById('dt_de')?document.getElementById('dt_de').value:'';
+  const ate=document.getElementById('dt_ate')?document.getElementById('dt_ate').value:'';
   const allTaxas=LD('taxas')||TAXAS_HISTORICO;
   let rows=[];
   allTaxas.forEach(rec=>{
     // Derive mes from data if missing
     const recMes=rec.mes||getMesFromData(rec.data);
     if(mes&&recMes!==mes)return;
-    if(data&&String(rec.data).substring(0,10)!==data)return;
+    const dataStr=String(rec.data).substring(0,10);
+    if(de&&dataStr<de)return;
+    if(ate&&dataStr>ate)return;
     (rec.taxas||[]).forEach(tx=>{
       if(setor&&tx.setor!==setor)return;
       if(tipo&&tx.tipo!==tipo)return;
