@@ -1185,9 +1185,16 @@ function renderDashTaxas(){
   const allDatas=(LD('taxas')||TAXAS_HISTORICO).map(r=>r.data);
   if(allDatas.length){
     const mes=document.getElementById('dt_mes').value;
-    const dataFilt=document.getElementById('dt_de')?document.getElementById('dt_de').value:'';
-    if(dataFilt){totalDiasPeriodo=1;}
-    else if(mes){
+    const deVal=document.getElementById('dt_de')?document.getElementById('dt_de').value:'';
+    const ateVal=document.getElementById('dt_ate')?document.getElementById('dt_ate').value:'';
+    if(deVal&&ateVal){
+      // Days between de and ate
+      const d1=new Date(deVal+'T12:00:00');
+      const d2=new Date(ateVal+'T12:00:00');
+      totalDiasPeriodo=Math.max(1,Math.round((d2-d1)/(864e5))+1);
+    } else if(deVal||ateVal){
+      totalDiasPeriodo=diasComRegistro; // fallback to days with records
+    } else if(mes){
       // Days in that month
       const mIdx=MESES_ORDER.indexOf(mes);
       if(mIdx>=0){const y=new Date().getFullYear();totalDiasPeriodo=new Date(y,mIdx+1,0).getDate();}
