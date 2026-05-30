@@ -407,9 +407,6 @@ body.view-mode .form-footer{display:none;}
     <div class="filtro-sep"></div>
     <label>Setor:</label>
     <select id="dt_setor" onchange="renderDashTaxas()"><option value="">Todos</option><option>Salão</option><option>Cozinha</option><option>Bar</option><option>Sushi</option><option>Serviços Gerais</option><option>Op. Caixa</option><option>Gerência</option></select>
-    <div class="filtro-sep"></div>
-    <label>Tipo:</label>
-    <select id="dt_tipo" onchange="renderDashTaxas()"><option value="">Todos</option><option>Taxa Normal</option><option>Folga Vendida</option></select>
     <button onclick="limparFiltrosTaxas()" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;white-space:nowrap;">✕ Limpar</button>
   </div>
 
@@ -1129,7 +1126,7 @@ function getMesFromData(data){
 function getTaxasFiltered(){
   const mes=document.getElementById('dt_mes').value;
   const setor=document.getElementById('dt_setor').value;
-  const tipo=document.getElementById('dt_tipo').value;
+  const tipo=document.getElementById('dt_tipo')?document.getElementById('dt_tipo').value:'';
   const de=document.getElementById('dt_de')?document.getElementById('dt_de').value:'';
   const ate=document.getElementById('dt_ate')?document.getElementById('dt_ate').value:'';
   const allTaxas=LD('taxas')||TAXAS_HISTORICO;
@@ -1154,7 +1151,6 @@ function limparFiltrosTaxas(){
   const de=document.getElementById('dt_de');if(de)de.value='';
   const ate=document.getElementById('dt_ate');if(ate)ate.value='';
   document.getElementById('dt_setor').value='';
-  document.getElementById('dt_tipo').value='';
   renderDashTaxas();
 }
 
@@ -1189,7 +1185,7 @@ function renderDashTaxas(){
   const allDatas=(LD('taxas')||TAXAS_HISTORICO).map(r=>r.data);
   if(allDatas.length){
     const mes=document.getElementById('dt_mes').value;
-    const dataFilt=document.getElementById('dt_data').value;
+    const dataFilt=document.getElementById('dt_de')?document.getElementById('dt_de').value:'';
     if(dataFilt){totalDiasPeriodo=1;}
     else if(mes){
       // Days in that month
@@ -1274,7 +1270,8 @@ function renderDashTaxas(){
   // Ranking colaboradores — usa todos os dados sem filtro de mês/setor/tipo
   const allRowsForRank=[];
   (LD('taxas')||TAXAS_HISTORICO).forEach(rec=>(rec.taxas||[]).forEach(tx=>allRowsForRank.push(tx)));
-  const rowsForRank=document.getElementById('dt_mes').value||document.getElementById('dt_setor').value||document.getElementById('dt_tipo').value?rows:allRowsForRank;
+  const hasFiltro=document.getElementById('dt_mes').value||document.getElementById('dt_setor').value||(document.getElementById('dt_de')&&document.getElementById('dt_de').value)||(document.getElementById('dt_ate')&&document.getElementById('dt_ate').value);
+  const rowsForRank=hasFiltro?rows:allRowsForRank;
   const byColab={};
   rowsForRank.forEach(r=>{if(!r.colaborador)return;if(!byColab[r.colaborador])byColab[r.colaborador]={qtd:0,total:0,setor:r.setor};byColab[r.colaborador].qtd++;byColab[r.colaborador].total+=r.valor;});
   const busca=(document.getElementById('rank_busca').value||'').toLowerCase();
