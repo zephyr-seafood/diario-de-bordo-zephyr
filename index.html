@@ -226,7 +226,7 @@ body.view-mode .form-footer{display:none;}
 <body>
 <header>
   <div class="logo">ZEPHYR<span>Seafood & Nikkei</span></div>
-  <button onclick="sincronizarSheets()" id="sync_btn" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:var(--white);padding:6px 10px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap;">🔄 Sincronizar</button>
+  <button type="button" onclick="sincronizarSheets()" id="sync_btn" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:var(--white);padding:6px 10px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap;">🔄 Sincronizar</button>
 </header>
 <div class="tabs">
   <div class="tab active" data-tab="dash-feedback" onclick="switchTab('dash-feedback')">📈 Dashboard Feedback</div>
@@ -248,8 +248,8 @@ body.view-mode .form-footer{display:none;}
       <div style="font-weight:600;font-size:13px;color:var(--gold);">Turno já registrado hoje</div>
       <div id="turno_alerta_txt" style="font-size:12px;color:var(--gray);margin-top:2px;"></div>
     </div>
-    <button onclick="editarTurnoExistente()" style="background:var(--gold);color:var(--white);border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>
-    <button onclick="ignorarAlerta()" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;">Criar novo</button>
+    <button type="button" onclick="editarTurnoExistente()" style="background:var(--gold);color:var(--white);border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>
+    <button type="button" onclick="ignorarAlerta()" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;">Criar novo</button>
   </div>
   <div class="card">
     <div class="card-title">⚡ Informações do Turno</div>
@@ -330,7 +330,7 @@ body.view-mode .form-footer{display:none;}
       <div class="form-group"><label>🟢 Elogios</label><textarea id="f_elogios" placeholder="Registre os elogios..."></textarea></div>
     </div>
   </div>
-  <div class="form-footer"><button class="btn-salvar" onclick="salvarFeedback()">✓ Salvar Feedback</button></div>
+  <div class="form-footer"><button type="button" class="btn-salvar" onclick="salvarFeedback()">✓ Salvar Feedback</button></div>
 </div>
 
 <!-- ════ ABA HISTÓRICO ════ -->
@@ -357,16 +357,16 @@ body.view-mode .form-footer{display:none;}
   <div class="card">
     <div class="card-title">👥 Colaboradores</div>
     <div id="taxas_list"></div>
-    <button class="btn-add-taxa" onclick="addTaxaRow()">+ Registrar Taxa</button>
-    <button class="btn-add-taxa" style="border-color:var(--gold);color:var(--gold);margin-top:8px;" onclick="abrirNovoColab()">👤 + Novo Colaborador na Lista</button>
+    <button type="button" class="btn-add-taxa" onclick="addTaxaRow()">+ Registrar Taxa</button>
+    <button type="button" class="btn-add-taxa" style="border-color:var(--gold);color:var(--gold);margin-top:8px;" onclick="abrirNovoColab()">👤 + Novo Colaborador na Lista</button>
   </div>
   <div class="taxa-total-box">
     <div><div style="color:var(--gold-light);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Total a Pagar</div><div id="taxa_total" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--white);">R$ 0,00</div></div>
     <div style="text-align:right;"><div style="color:var(--gray-light);font-size:10px;margin-bottom:4px;">Colaboradores</div><div id="taxa_count" style="font-size:24px;font-weight:700;color:var(--white);">0</div></div>
   </div>
   <div class="form-footer" style="justify-content:space-between;">
-    <button id="btn_excluir_taxa" onclick="excluirTaxaEmEdicao()" style="display:none;background:none;border:1.5px solid var(--coral);color:var(--coral);padding:10px 20px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">🗑 Excluir este registro</button>
-    <button class="btn-salvar" onclick="salvarTaxas()">✓ Salvar Taxas</button>
+    <button type="button" id="btn_excluir_taxa" onclick="excluirTaxaEmEdicao()" style="display:none;background:none;border:1.5px solid var(--coral);color:var(--coral);padding:10px 20px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">🗑 Excluir este registro</button>
+    <button type="button" class="btn-salvar" onclick="salvarTaxas()">✓ Salvar Taxas</button>
   </div>
 </div>
 
@@ -375,8 +375,8 @@ body.view-mode .form-footer{display:none;}
   <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
     <div><div class="section-title">Histórico de Taxas</div><div class="section-sub">Consulte e edite registros de dias anteriores</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button onclick="exportarTaxasCSV()" style="background:var(--teal);color:var(--white);border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;">📥 Exportar CSV</button>
-      <button id="btn_migrar" onclick="migrarTaxasParaSheets()" style="background:var(--gold);color:var(--white);border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;">📤 Enviar ao Sheets</button>
+      <button type="button" onclick="exportarTaxasCSV()" style="background:var(--teal);color:var(--white);border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;">📥 Exportar CSV</button>
+      <button type="button" id="btn_migrar" onclick="migrarTaxasParaSheets()" style="background:var(--gold);color:var(--white);border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;">📤 Enviar ao Sheets</button>
     </div>
   </div>
   <div class="hist-filters">
@@ -393,7 +393,7 @@ body.view-mode .form-footer{display:none;}
 <div class="page" id="page-dash-taxas">
   <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
     <div><div class="section-title">Dashboard · Controle de Taxas</div><div class="section-sub">Análise de pagamentos e colaboradores · Jan–Mai 2026</div></div>
-    <button onclick="exportarPDF()" style="background:var(--brand);color:var(--white);border:none;padding:10px 18px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;white-space:nowrap;box-shadow:0 4px 12px rgba(7,71,89,0.25);">📄 Exportar PDF</button>
+    <button type="button" onclick="exportarPDF()" style="background:var(--brand);color:var(--white);border:none;padding:10px 18px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;white-space:nowrap;box-shadow:0 4px 12px rgba(7,71,89,0.25);">📄 Exportar PDF</button>
   </div>
 
   <div class="filtro-row">
@@ -407,7 +407,7 @@ body.view-mode .form-footer{display:none;}
     <div class="filtro-sep"></div>
     <label>Setor:</label>
     <select id="dt_setor" onchange="renderDashTaxas()"><option value="">Todos</option><option>Salão</option><option>Cozinha</option><option>Bar</option><option>Sushi</option><option>Serviços Gerais</option><option>Op. Caixa</option><option>Gerência</option></select>
-    <button onclick="limparFiltrosTaxas()" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;white-space:nowrap;">✕ Limpar</button>
+    <button type="button" onclick="limparFiltrosTaxas()" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;white-space:nowrap;">✕ Limpar</button>
   </div>
 
   <!-- KPIs -->
@@ -449,8 +449,8 @@ body.view-mode .form-footer{display:none;}
     <div class="card col-full">
       <div class="card-title">🏆 Ranking de Colaboradores</div>
       <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-        <button class="page-btn active" id="rank_btn_val" onclick="setRankMode('val')">Por Valor</button>
-        <button class="page-btn" id="rank_btn_qtd" onclick="setRankMode('qtd')">Por Frequência</button>
+        <button type="button" class="page-btn active" id="rank_btn_val" onclick="setRankMode('val')">Por Valor</button>
+        <button type="button" class="page-btn" id="rank_btn_qtd" onclick="setRankMode('qtd')">Por Frequência</button>
         <input type="text" id="rank_busca" placeholder="Filtrar colaborador..." oninput="renderDashTaxas()" style="max-width:200px;padding:7px 12px;font-size:12px;">
       </div>
       <div id="dt_ranking"></div>
@@ -592,7 +592,7 @@ body.view-mode .form-footer{display:none;}
     <div class="form-group" style="margin-bottom:14px;"><label>Observação</label>
       <textarea id="ev_obs" placeholder="Detalhes do evento, particularidades, montagem especial..."></textarea>
     </div>
-    <div class="form-footer"><button class="btn-salvar" onclick="salvarEvento()">✓ Salvar Evento</button></div>
+    <div class="form-footer"><button type="button" class="btn-salvar" onclick="salvarEvento()">✓ Salvar Evento</button></div>
   </div>
 
   <!-- Filtro período -->
@@ -616,7 +616,7 @@ body.view-mode .form-footer{display:none;}
       <option>Menu Aberto</option><option>Menu Fechado</option><option>Finger Food</option>
       <option>Coquetel Volante</option><option>Menu Personalizado</option>
     </select>
-    <button onclick="document.getElementById('ev_de').value='';document.getElementById('ev_ate').value='';renderEventos();" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;">✕ Limpar</button>
+    <button type="button" onclick="document.getElementById('ev_de').value='';document.getElementById('ev_ate').value='';renderEventos();" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;">✕ Limpar</button>
   </div>
 
   <!-- KPIs -->
@@ -658,7 +658,7 @@ body.view-mode .form-footer{display:none;}
   <div class="modal" style="max-width:400px;">
     <div class="modal-header">
       <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;">＋ Novo Item</div>
-      <button class="modal-close" onclick="fecharNovoItem()">×</button>
+      <button type="button" class="modal-close" onclick="fecharNovoItem()">×</button>
     </div>
     <div class="modal-body">
       <p style="font-size:13px;color:var(--gray);margin-bottom:16px;">Confirme o nome e selecione o setor. O item será salvo no cardápio para os próximos registros.</p>
@@ -675,8 +675,8 @@ body.view-mode .form-footer{display:none;}
         </div>
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;">
-        <button onclick="fecharNovoItem()" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:10px 20px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;">Cancelar</button>
-        <button onclick="confirmarNovoItem()" class="btn-salvar" style="padding:10px 24px;font-size:13px;">✓ Adicionar</button>
+        <button type="button" onclick="fecharNovoItem()" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:10px 20px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;">Cancelar</button>
+        <button type="button" onclick="confirmarNovoItem()" class="btn-salvar" style="padding:10px 24px;font-size:13px;">✓ Adicionar</button>
       </div>
     </div>
   </div>
@@ -686,7 +686,7 @@ body.view-mode .form-footer{display:none;}
   <div class="modal" style="max-width:420px;">
     <div class="modal-header">
       <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;">👤 Novo Colaborador</div>
-      <button class="modal-close" onclick="fecharNovoColab()">×</button>
+      <button type="button" class="modal-close" onclick="fecharNovoColab()">×</button>
     </div>
     <div class="modal-body">
       <p style="font-size:13px;color:var(--gray);margin-bottom:18px;">Preencha os dados. O colaborador será salvo permanentemente na lista de sugestões.</p>
@@ -703,8 +703,8 @@ body.view-mode .form-footer{display:none;}
         </select>
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
-        <button onclick="fecharNovoColab()" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:10px 20px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;">Cancelar</button>
-        <button onclick="salvarNovoColab()" class="btn-salvar" style="padding:10px 24px;font-size:13px;">✓ Salvar Colaborador</button>
+        <button type="button" onclick="fecharNovoColab()" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:10px 20px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;">Cancelar</button>
+        <button type="button" onclick="salvarNovoColab()" class="btn-salvar" style="padding:10px 24px;font-size:13px;">✓ Salvar Colaborador</button>
       </div>
     </div>
   </div>
@@ -925,7 +925,7 @@ function renderTaxaRows(){
     <div class="form-group fg-sm fg-fechado"><label>Valor acordado (R$)</label><input type="number" list="vf_sugestoes" value="${r.valorFechado||''}" placeholder="Ex: 120" min="0" step="1" oninput="valorFechadoChanged(${r.id},this.value)"><datalist id="vf_sugestoes"><option value="100"><option value="120"><option value="150"></datalist></div>
     <div class="form-group fg-total"><label>Total</label><div class="taxa-calc" id="tc_${r.id}">${totalDisplay}</div></div>
     <div class="form-group" style="flex:1.5;min-width:140px;"><label>Observação</label><input type="text" value="${r.obs||''}" placeholder="Ex: acordado com gerente..." oninput="updTaxa(${r.id},'obs',this.value)"></div>
-    <div class="fg-btn"><button class="btn-remove" onclick="removeTaxaRow(${r.id})">✕</button></div>
+    <div class="fg-btn"><button type="button" class="btn-remove" onclick="removeTaxaRow(${r.id})">✕</button></div>
   </div>`;
   }).join('');calcTaxaTotal();
 }
@@ -1045,10 +1045,10 @@ function renderHistorico(){
   const pag=document.getElementById('hist_pagination');
   if(pages<=1){pag.innerHTML=`<div class="page-info">${total} registro(s)</div>`;return;}
   let btns=`<div class="page-info">${total} registro(s)</div>`;
-  if(histPage>1)btns+=`<button class="page-btn" onclick="goPage(${histPage-1})">‹</button>`;
+  if(histPage>1)btns+=`<button type="button" class="page-btn" onclick="goPage(${histPage-1})">‹</button>`;
   const s=Math.max(1,histPage-2),en=Math.min(pages,histPage+2);
-  for(let i=s;i<=en;i++)btns+=`<button class="page-btn${i===histPage?' active':''}" onclick="goPage(${i})">${i}</button>`;
-  if(histPage<pages)btns+=`<button class="page-btn" onclick="goPage(${histPage+1})">›</button>`;
+  for(let i=s;i<=en;i++)btns+=`<button type="button" class="page-btn${i===histPage?' active':''}" onclick="goPage(${i})">${i}</button>`;
+  if(histPage<pages)btns+=`<button type="button" class="page-btn" onclick="goPage(${histPage+1})">›</button>`;
   pag.innerHTML=btns;
 }
 function goPage(p){histPage=p;renderHistorico();document.getElementById('hist_list').scrollIntoView({behavior:'smooth'});}
@@ -1064,8 +1064,8 @@ function openModal(id){
       <div><div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;">${ds}</div>
       <div style="display:flex;gap:6px;margin-top:5px;"><span class="badge ${f.turno==='Almoço'?'badge-almoco':'badge-jantar'}">${f.turno}</span><span class="badge badge-gerente">${f.gerente}</span>${f.clima?`<span>${f.clima}</span>`:''}</div></div>
       <div style="display:flex;gap:8px;align-items:center;">
-        ${!isView?`<button class="btn-edit" onclick="editFeedback(${id})">✏️ Editar</button><button class="btn-delete" onclick="deleteFeedback(${id})">🗑</button>`:''}
-        <button class="modal-close" onclick="closeModal()">×</button>
+        ${!isView?`<button type="button" class="btn-edit" onclick="editFeedback(${id})">✏️ Editar</button><button type="button" class="btn-delete" onclick="deleteFeedback(${id})">🗑</button>`:''}
+        <button type="button" class="modal-close" onclick="closeModal()">×</button>
       </div>
     </div>
     <div class="modal-body">
@@ -1998,7 +1998,7 @@ function renderEventos(){
             '<div style="font-size:16px;font-weight:700;color:var(--teal);">R$ '+(e.faturamento||0).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
             '<div style="font-size:11px;color:var(--gray);">'+(e.clientes||0)+' clientes'+(e.precoMenu?' · R$'+e.precoMenu.toFixed(2).replace('.',',')+'/p':'')+'</div>'+
           '</div>'+
-          (!isView?'<button onclick="deletarEvento('+e.id+')" class="btn-remove" style="padding:6px 10px;">🗑</button>':'')+
+          (!isView?'<button type="button" onclick="deletarEvento('+e.id+')" class="btn-remove" style="padding:6px 10px;">🗑</button>':'')+
         '</div>'+
       '</div>'+
       (e.obs?'<div style="font-size:12px;color:var(--gray);font-style:italic;margin-top:6px;">'+e.obs+'</div>':'')+
@@ -2176,7 +2176,7 @@ function renderHistTaxas(){
         '<div style="display:flex;gap:8px;align-items:center;">'+
           '<span style="font-size:13px;font-weight:700;color:var(--teal);">R$ '+totalRec.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span>'+
           '<span style="font-size:12px;color:var(--gray);">'+taxasFilt.length+' colaborador'+(taxasFilt.length!==1?'es':'')+'</span>'+
-          (!isView?'<button onclick="editarTaxa('+rec.id+')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>':'')+
+          (!isView?'<button type="button" onclick="editarTaxa('+rec.id+')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>':'')+
         '</div>'+
       '</div>'+
       '<div style="display:flex;flex-wrap:wrap;gap:6px;">'+
@@ -2187,10 +2187,10 @@ function renderHistTaxas(){
   const pag=document.getElementById('ht_pagination');
   if(pages<=1){pag.innerHTML='<div class="page-info">'+total+' dia(s)</div>';return;}
   let btns='<div class="page-info">'+total+' dia(s)</div>';
-  if(htPage>1)btns+='<button class="page-btn" onclick="htGoPage('+(htPage-1)+')">‹</button>';
+  if(htPage>1)btns+='<button type="button" class="page-btn" onclick="htGoPage('+(htPage-1)+')">‹</button>';
   const s=Math.max(1,htPage-2),en=Math.min(pages,htPage+2);
-  for(let i=s;i<=en;i++)btns+='<button class="page-btn'+(i===htPage?' active':'')+'" onclick="htGoPage('+i+')">'+i+'</button>';
-  if(htPage<pages)btns+='<button class="page-btn" onclick="htGoPage('+(htPage+1)+')">›</button>';
+  for(let i=s;i<=en;i++)btns+='<button type="button" class="page-btn'+(i===htPage?' active':'')+'" onclick="htGoPage('+i+')">'+i+'</button>';
+  if(htPage<pages)btns+='<button type="button" class="page-btn" onclick="htGoPage('+(htPage+1)+')">›</button>';
   pag.innerHTML=btns;
 }
 function htGoPage(p){htPage=p;renderHistTaxas();document.getElementById('ht_list').scrollIntoView({behavior:'smooth'});}
@@ -2259,7 +2259,7 @@ function verDetalheColab(nome){
         <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;">${nome}</div>
         <div style="font-size:12px;color:var(--gray);margin-top:4px;">${setor} · ${qtdGeral} taxa${qtdGeral!==1?'s':''} registrada${qtdGeral!==1?'s':''}</div>
       </div>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <button type="button" class="modal-close" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
       <div class="modal-grid" style="margin-bottom:20px;">
@@ -2584,7 +2584,7 @@ function renderEventos(){
             '<div style="font-size:16px;font-weight:700;color:var(--teal);">R$ '+(e.faturamento||0).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
             '<div style="font-size:11px;color:var(--gray);">'+(e.clientes||0)+' clientes'+(e.precoMenu?' · R$'+e.precoMenu.toFixed(2).replace('.',',')+'/p':'')+'</div>'+
           '</div>'+
-          (!isView?'<button onclick="deletarEvento('+e.id+')" class="btn-remove" style="padding:6px 10px;">🗑</button>':'')+
+          (!isView?'<button type="button" onclick="deletarEvento('+e.id+')" class="btn-remove" style="padding:6px 10px;">🗑</button>':'')+
         '</div>'+
       '</div>'+
       (e.obs?'<div style="font-size:12px;color:var(--gray);font-style:italic;margin-top:6px;">'+e.obs+'</div>':'')+
@@ -2761,7 +2761,7 @@ function renderHistTaxas(){
         '<div style="display:flex;gap:8px;align-items:center;">'+
           '<span style="font-size:13px;font-weight:700;color:var(--teal);">R$ '+totalRec.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span>'+
           '<span style="font-size:12px;color:var(--gray);">'+taxasFilt.length+' colaborador'+(taxasFilt.length!==1?'es':'')+'</span>'+
-          (!isView?'<button onclick="editarTaxa('+rec.id+')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>':'')+
+          (!isView?'<button type="button" onclick="editarTaxa('+rec.id+')" style="background:var(--gold);color:var(--white);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">✏️ Editar</button>':'')+
         '</div>'+
       '</div>'+
       '<div style="display:flex;flex-wrap:wrap;gap:6px;">'+
@@ -2772,10 +2772,10 @@ function renderHistTaxas(){
   const pag=document.getElementById('ht_pagination');
   if(pages<=1){pag.innerHTML='<div class="page-info">'+total+' dia(s)</div>';return;}
   let btns='<div class="page-info">'+total+' dia(s)</div>';
-  if(htPage>1)btns+='<button class="page-btn" onclick="htGoPage('+(htPage-1)+')">‹</button>';
+  if(htPage>1)btns+='<button type="button" class="page-btn" onclick="htGoPage('+(htPage-1)+')">‹</button>';
   const s=Math.max(1,htPage-2),en=Math.min(pages,htPage+2);
-  for(let i=s;i<=en;i++)btns+='<button class="page-btn'+(i===htPage?' active':'')+'" onclick="htGoPage('+i+')">'+i+'</button>';
-  if(htPage<pages)btns+='<button class="page-btn" onclick="htGoPage('+(htPage+1)+')">›</button>';
+  for(let i=s;i<=en;i++)btns+='<button type="button" class="page-btn'+(i===htPage?' active':'')+'" onclick="htGoPage('+i+')">'+i+'</button>';
+  if(htPage<pages)btns+='<button type="button" class="page-btn" onclick="htGoPage('+(htPage+1)+')">›</button>';
   pag.innerHTML=btns;
 }
 function htGoPage(p){htPage=p;renderHistTaxas();document.getElementById('ht_list').scrollIntoView({behavior:'smooth'});}
@@ -2844,7 +2844,7 @@ function verDetalheColab(nome){
         <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;">${nome}</div>
         <div style="font-size:12px;color:var(--gray);margin-top:4px;">${setor} · ${qtdGeral} taxa${qtdGeral!==1?'s':''} registrada${qtdGeral!==1?'s':''}</div>
       </div>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <button type="button" class="modal-close" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
       <div class="modal-grid" style="margin-bottom:20px;">
@@ -3031,7 +3031,7 @@ function excluirTaxa(recId){
     <div id="login_erro" style="display:none;background:#fff5f5;border:1px solid #ffcdd2;color:var(--coral);font-size:12px;padding:10px 14px;border-radius:8px;margin-bottom:16px;text-align:center;">
       ❌ Senha incorreta. Tente novamente.
     </div>
-    <button onclick="fazerLogin()" style="background:var(--brand);color:var(--white);border:none;padding:14px;border-radius:12px;font-family:inherit;font-size:15px;font-weight:600;width:100%;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(7,71,89,0.3);">
+    <button type="button" onclick="fazerLogin()" style="background:var(--brand);color:var(--white);border:none;padding:14px;border-radius:12px;font-family:inherit;font-size:15px;font-weight:600;width:100%;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(7,71,89,0.3);">
       Entrar
     </button>
     <p style="text-align:center;font-size:11px;color:var(--gray-light);margin-top:20px;">Diário de Bordo Zephyr · Uso interno</p>
