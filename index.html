@@ -1402,10 +1402,15 @@ function renderDashFeedback(){
   // df_periodo removed — using df_de/df_ate
   const turno=document.getElementById('df_turno').value;
   const gerente=document.getElementById('df_gerente').value;
-  const now=new Date();
+  const de=document.getElementById('df_de')?document.getElementById('df_de').value:'';
+  const ate=document.getElementById('df_ate')?document.getElementById('df_ate').value:'';
   const data=fbs.filter(f=>{
-    const d=new Date(f.data);
-    return d>=cutoff&&(!turno||f.turno===turno)&&(!gerente||f.gerente===gerente);
+    const dataStr=String(f.data).substring(0,10);
+    if(de&&dataStr<de)return false;
+    if(ate&&dataStr>ate)return false;
+    if(turno&&f.turno!==turno)return false;
+    if(gerente&&f.gerente!==gerente)return false;
+    return true;
   }).sort((a,b)=>b.data.localeCompare(a.data));
 
   if(!data.length){
