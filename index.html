@@ -1403,7 +1403,6 @@ function renderDashFeedback(){
   const turno=document.getElementById('df_turno').value;
   const gerente=document.getElementById('df_gerente').value;
   const now=new Date();
-  const cutoff=periodo==='all'?new Date('2020-01-01'):new Date(now-parseInt(periodo)*864e5);
   const data=fbs.filter(f=>{
     const d=new Date(f.data);
     return d>=cutoff&&(!turno||f.turno===turno)&&(!gerente||f.gerente===gerente);
