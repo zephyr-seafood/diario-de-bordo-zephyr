@@ -426,6 +426,20 @@ body.view-mode .form-footer{display:none;}
     </div>
   </div>
 
+  <!-- Classificação Reposição vs Extra -->
+  <div class="kpi-row" style="grid-template-columns:1fr 1fr;margin-bottom:16px;">
+    <div class="kpi-card" id="dt_k_repos" style="border-left:4px solid var(--teal);">
+      <div class="kpi-label">🔄 Reposição</div>
+      <div class="kpi-value" id="dt_k_repos_val" style="color:var(--teal);">R$ —</div>
+      <div class="kpi-sub" id="dt_k_repos_sub">férias, faltas, folgas</div>
+    </div>
+    <div class="kpi-card" id="dt_k_extra" style="border-left:4px solid var(--gold);">
+      <div class="kpi-label">📈 Extra</div>
+      <div class="kpi-value" id="dt_k_extra_val" style="color:var(--gold);">R$ —</div>
+      <div class="kpi-sub" id="dt_k_extra_sub">demanda adicional</div>
+    </div>
+  </div>
+
   <div class="dash-grid">
     <!-- Evolução mensal -->
     <div class="card col-full">
@@ -473,14 +487,17 @@ body.view-mode .form-footer{display:none;}
   <div class="page-header"><div class="section-title">Dashboard · Feedback Operacional</div><div class="section-sub">Análise de desempenho por turno e gerente</div></div>
 
   <div class="filtro-row">
-    <label>Período:</label>
-    <select id="df_periodo" onchange="renderDashFeedback()"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">3 meses</option><option value="all">Tudo</option></select>
+    <label>De:</label>
+    <input type="date" id="df_de" onchange="renderDashFeedback()" style="max-width:150px;">
+    <label>Até:</label>
+    <input type="date" id="df_ate" onchange="renderDashFeedback()" style="max-width:150px;">
     <div class="filtro-sep"></div>
     <label>Turno:</label>
     <select id="df_turno" onchange="renderDashFeedback()"><option value="">Todos</option><option>Almoço</option><option>Jantar</option></select>
     <div class="filtro-sep"></div>
     <label>Gerente:</label>
     <select id="df_gerente" onchange="renderDashFeedback()"><option value="">Todos</option><option>Cristiane</option><option>Crissia</option><option>Cristiane e Crissia</option><option>Aline Bettio</option><option>William Moura</option><option>Op. Caixa</option></select>
+    <button type="button" onclick="limparFiltrosFeedback()" style="background:none;border:1.5px solid var(--border);color:var(--gray);padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;white-space:nowrap;">✕ Limpar</button>
   </div>
 
   <!-- KPIs -->
@@ -918,6 +935,7 @@ function renderTaxaRows(){
     <div class="form-group fg-colab"><label>Colaborador</label><input list="cl_${r.id}" value="${r.colaborador}" placeholder="Nome..." oninput="updTaxa(${r.id},'colaborador',this.value)"><datalist id="cl_${r.id}">${COLABORADORES.map(c=>`<option value="${c}">`).join('')}</datalist></div>
     <div class="form-group"><label>Setor</label><select onchange="updTaxa(${r.id},'setor',this.value)"><option value="">Setor...</option>${SETORES.map(s=>`<option${r.setor===s?' selected':''}>${s}</option>`).join('')}</select></div>
     <div class="form-group"><label>Tipo</label><select onchange="tipoChanged(${r.id},this.value)"><option value="">Tipo...</option><option${r.tipo==='Taxa Normal'?' selected':''}>Taxa Normal</option><option${r.tipo==='Folga Vendida'?' selected':''}>Folga Vendida</option></select></div>
+    <div class="form-group"><label>Classificação</label><select onchange="updTaxa(${r.id},'classificacao',this.value)"><option value="">Classif...</option><option value="reposicao"${r.classificacao==='reposicao'?' selected':''}>🔄 Reposição</option><option value="extra"${r.classificacao==='extra'?' selected':''}>📈 Extra</option></select></div>
     <div class="form-group"><label>Modalidade</label><select onchange="modoChanged(${r.id},this.value)"><option value="hora"${r.modo!=='fechado'?' selected':''}>⏱ Por hora</option><option value="fechado"${r.modo==='fechado'?' selected':''}>💲 Valor fechado</option></select></div>
     <div class="form-group fg-sm fg-hora"><label>Entrada</label><input type="time" value="${r.entrada||''}" oninput="updTaxaCalc(${r.id},'entrada',this.value)"></div>
     <div class="form-group fg-sm fg-hora"><label>Saída</label><input type="time" value="${r.saida||''}" oninput="updTaxaCalc(${r.id},'saida',this.value)"></div>
@@ -1138,9 +1156,12 @@ function getTaxasFiltered(){
     const dataStr=String(rec.data).substring(0,10);
     if(de&&dataStr<de)return;
     if(ate&&dataStr>ate)return;
+    const classifFilt=document.getElementById('dt_classif')?document.getElementById('dt_classif').value:'';
     (rec.taxas||[]).forEach(tx=>{
       if(setor&&tx.setor!==setor)return;
       if(tipo&&tx.tipo!==tipo)return;
+      if(classifFilt==='sem'&&tx.classificacao)return;
+      if(classifFilt&&classifFilt!=='sem'&&tx.classificacao!==classifFilt)return;
       rows.push({...tx,data:rec.data,mes:recMes});
     });
   });
@@ -1176,6 +1197,21 @@ function renderDashTaxas(){
   document.getElementById('dt_k3s').textContent='por taxa em média';
   document.getElementById('dt_k4').textContent=uniqColab;
   document.getElementById('dt_k4s').textContent='colaboradores distintos';
+
+  // Reposição vs Extra
+  const totalRepos=rows.filter(r=>r.classificacao==='reposicao').reduce((a,r)=>a+(r.valor||0),0);
+  const totalExtra=rows.filter(r=>r.classificacao==='extra').reduce((a,r)=>a+(r.valor||0),0);
+  const totalClassif=totalRepos+totalExtra;
+  const pctRepos=totalClassif>0?((totalRepos/totalClassif)*100).toFixed(0):0;
+  const pctExtra=totalClassif>0?((totalExtra/totalClassif)*100).toFixed(0):0;
+  const elReposVal=document.getElementById('dt_k_repos_val');
+  const elReposSub=document.getElementById('dt_k_repos_sub');
+  const elExtraVal=document.getElementById('dt_k_extra_val');
+  const elExtraSub=document.getElementById('dt_k_extra_sub');
+  if(elReposVal)elReposVal.textContent='R$ '+totalRepos.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(elReposSub)elReposSub.textContent=totalClassif>0?(pctRepos+'% do total classificado'):'sem dados classificados ainda';
+  if(elExtraVal)elExtraVal.textContent='R$ '+totalExtra.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(elExtraSub)elExtraSub.textContent=totalClassif>0?(pctExtra+'% do total classificado'):'sem dados classificados ainda';
 
   // KPI 5 — custo médio por dia
   const diasComRegistro=new Set(rows.map(r=>r.data)).size;
@@ -1363,7 +1399,7 @@ function renderDashTaxas(){
 // ═══════════════════════════════════════
 function renderDashFeedback(){
   const fbs=LD('feedbacks')||[];
-  const periodo=document.getElementById('df_periodo').value;
+  // df_periodo removed — using df_de/df_ate
   const turno=document.getElementById('df_turno').value;
   const gerente=document.getElementById('df_gerente').value;
   const now=new Date();
@@ -2298,7 +2334,8 @@ const RESP_SETOR_MAP = {
 
 function renderProdutividade(){
   const fbs = LD('feedbacks')||[];
-  const periodo = document.getElementById('df_periodo')?.value||'all';
+  const deP = document.getElementById('df_de')?.value||'';
+  const ateP = document.getElementById('df_ate')?.value||'';
   const turnoFilt = document.getElementById('df_turno')?.value||'';
   const gerenteFilt = document.getElementById('df_gerente')?.value||'';
   const setor = document.getElementById('df_resp_setor')?.value||'cozinha';
@@ -2306,13 +2343,11 @@ function renderProdutividade(){
   const el = document.getElementById('df_produtividade');
   if(!el) return;
 
-  const now = new Date();
-  const cutoff = periodo==='all'?new Date('2000-01-01'):new Date(now-parseInt(periodo)*864e5);
-
   // Filter feedbacks
   const data = fbs.filter(f=>{
-    const d = parseData(f.data);
-    if(!d||d<cutoff) return false;
+    const dataStr = String(f.data).substring(0,10);
+    if(deP&&dataStr<deP) return false;
+    if(ateP&&dataStr>ateP) return false;
     if(turnoFilt&&f.turno!==turnoFilt) return false;
     if(gerenteFilt&&f.gerente!==gerenteFilt) return false;
     if(!f.responsaveis) return false;
@@ -2778,7 +2813,6 @@ function renderHistTaxas(){
   if(htPage<pages)btns+='<button type="button" class="page-btn" onclick="htGoPage('+(htPage+1)+')">›</button>';
   pag.innerHTML=btns;
 }
-function htGoPage(p){htPage=p;renderHistTaxas();document.getElementById('ht_list').scrollIntoView({behavior:'smooth'});}
 function editarTaxa(recId){
   const allTaxas=LD('taxas')||TAXAS_HISTORICO;
   const id=String(recId).replace(/['"]/g,'');
@@ -2879,7 +2913,8 @@ function verDetalheColab(nome){
 
 function renderProdutividade(){
   const fbs = LD('feedbacks')||[];
-  const periodo = document.getElementById('df_periodo')?.value||'all';
+  const deP = document.getElementById('df_de')?.value||'';
+  const ateP = document.getElementById('df_ate')?.value||'';
   const turnoFilt = document.getElementById('df_turno')?.value||'';
   const gerenteFilt = document.getElementById('df_gerente')?.value||'';
   const setor = document.getElementById('df_resp_setor')?.value||'cozinha';
@@ -2887,13 +2922,11 @@ function renderProdutividade(){
   const el = document.getElementById('df_produtividade');
   if(!el) return;
 
-  const now = new Date();
-  const cutoff = periodo==='all'?new Date('2000-01-01'):new Date(now-parseInt(periodo)*864e5);
-
   // Filter feedbacks
   const data = fbs.filter(f=>{
-    const d = parseData(f.data);
-    if(!d||d<cutoff) return false;
+    const dataStr = String(f.data).substring(0,10);
+    if(deP&&dataStr<deP) return false;
+    if(ateP&&dataStr>ateP) return false;
     if(turnoFilt&&f.turno!==turnoFilt) return false;
     if(gerenteFilt&&f.gerente!==gerenteFilt) return false;
     if(!f.responsaveis) return false;
@@ -3006,6 +3039,15 @@ function excluirTaxa(recId){
   showToast('🗑 Registro excluído!','success');
   renderHistTaxas();
   renderDashTaxas();
+}
+
+function limparFiltrosFeedback(){
+  const de=document.getElementById('df_de');if(de)de.value='';
+  const ate=document.getElementById('df_ate');if(ate)ate.value='';
+  const turno=document.getElementById('df_turno');if(turno)turno.value='';
+  const gerente=document.getElementById('df_gerente');if(gerente)gerente.value='';
+  renderDashFeedback();
+  renderProdutividade();
 }
 
 </script>
